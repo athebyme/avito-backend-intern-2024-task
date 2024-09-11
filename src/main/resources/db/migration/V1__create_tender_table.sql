@@ -1,4 +1,4 @@
-CREATE TABLE public.tender (
+CREATE TABLE tender (
         id UUID PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         description VARCHAR(500) NOT NULL,
