@@ -1,4 +1,4 @@
-package io.codefresh.gradleexample.dao.entities;
+package io.codefresh.gradleexample.dao.entities.organizations;
 
 public enum OrganizationTypesEnum {
     IE,
