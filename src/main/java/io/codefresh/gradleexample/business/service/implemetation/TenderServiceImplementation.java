@@ -8,7 +8,6 @@ import io.codefresh.gradleexample.dao.entities.tenders.TenderEntity;
 import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
 import io.codefresh.gradleexample.dao.repository.TenderRepository;
 import io.codefresh.gradleexample.exceptions.service.TenderNotFoundException;
-import jdk.internal.net.http.common.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +16,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 public class TenderServiceImplementation implements TenderServiceInterface {
