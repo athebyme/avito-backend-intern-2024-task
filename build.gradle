@@ -1,5 +1,7 @@
 plugins {
 	id 'org.springframework.boot' version '2.1.4.RELEASE'
+	id 'org.flywaydb.flyway' version '9.2.3'
+
 	id 'java'
 }
 
@@ -23,11 +25,19 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
+	implementation 'org.flywaydb:flyway-core'
+
+
 	testCompileOnly 'org.projectlombok:lombok:1.18.34'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
+flyway {
+	url = System.getenv('POSTGRES_JDBC_URL')
+	user = System.getenv('POSTGRES_USERNAME')
+	password = System.getenv('POSTGRES_PASSWORD')
+}
 test {
     useJUnit()
 
