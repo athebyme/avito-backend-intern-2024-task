@@ -40,6 +40,8 @@ flyway {
 }
 test {
     useJUnit()
-
+	environment "POSTGRES_JDBC_URL", System.getenv("POSTGRES_JDBC_URL")
+	environment "POSTGRES_USERNAME", System.getenv("POSTGRES_USERNAME")
+	environment "POSTGRES_PASSWORD", System.getenv("POSTGRES_PASSWORD")
     maxHeapSize = '1G'
 }
