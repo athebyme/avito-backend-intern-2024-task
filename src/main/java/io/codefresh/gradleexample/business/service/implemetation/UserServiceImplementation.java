@@ -15,11 +15,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService implements UserServiceInterface {
+public class UserServiceImplementation implements UserServiceInterface {
     private final UserRepository userRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserServiceImplementation(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
