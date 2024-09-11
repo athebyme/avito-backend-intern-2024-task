@@ -4,5 +4,4 @@ public enum TenderStatuses {
     CREATED,
     PUBLISHED,
     CLOSED,
-    EDIT,
 }
