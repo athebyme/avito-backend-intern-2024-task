@@ -9,6 +9,8 @@ import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
 import io.codefresh.gradleexample.dao.repository.TenderRepository;
 import io.codefresh.gradleexample.exceptions.service.TenderNotFoundException;
 import jdk.internal.net.http.common.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 public class TenderServiceImplementation implements TenderServiceInterface {
+    private static final Logger logger = LoggerFactory.getLogger(TenderServiceImplementation.class);
 
     private final TenderRepository tenderRepository;
 
@@ -76,7 +79,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
             tender.setCreatorUsername(creatorUsername);
         }
         catch (Exception e){
-            Log.logError(e);
+            logger.error(e.getMessage());
         }
         tender.setTender_status(TenderStatuses.CREATED);
         tenderRepository.save(tender);
