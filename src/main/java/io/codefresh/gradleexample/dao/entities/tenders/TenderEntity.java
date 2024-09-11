@@ -1,9 +1,5 @@
 package io.codefresh.gradleexample.dao.entities.tenders;
 
-import io.codefresh.gradleexample.exceptions.dto_exceptions.InvalidDescriptionException;
-import io.codefresh.gradleexample.exceptions.dto_exceptions.InvalidIdException;
-import io.codefresh.gradleexample.exceptions.dto_exceptions.InvalidUsernameException;
-import io.codefresh.gradleexample.exceptions.dto_exceptions.InvalidVersionException;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,7 +19,7 @@ public class TenderEntity {
     String creatorUsername;
     UUID organization_id;
     TenderStatuses tender_status;
-    String service_type;
+    ServiceTypes service_type;
 
     public TenderEntity(
             UUID id,

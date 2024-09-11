@@ -11,7 +11,7 @@ public class OrganizationEntity {
     UUID id;
     String name;
     String description;
-    OrganizationTypesEnum organization_type;
+    OrganizationTypesEnum type;
     Timestamp created_at;
     Timestamp updated_at;
 }
