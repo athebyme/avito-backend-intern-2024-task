@@ -3,8 +3,8 @@ package io.codefresh.gradleexample.dao.entities.tenders;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
@@ -12,14 +12,23 @@ import java.util.UUID;
 @Setter
 public class Tender {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     UUID id;
     Integer version;
     String description;
     String name;
     String creatorUsername;
     UUID organization_id;
-    TenderStatuses tender_status;
+
+    @Enumerated(EnumType.STRING)
+    TenderStatuses status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "serviceType")
     ServiceTypes service_type;
+
+    @Column(name = "created_at")
+    Timestamp created_at;
 
     public Tender(
             UUID id,
@@ -28,12 +37,9 @@ public class Tender {
             String name,
             String creatorUsername,
             UUID organization_id,
-            TenderStatuses tender_status) {
-//        if (id == null){throw new InvalidIdException("id cannot be null");}
-//        if (version == null){throw new InvalidVersionException("version cannot be null");}
-//        if (name == null || creatorUsername == null){throw new InvalidUsernameException("name cannot be null");}
-//        if (description == null) {throw new InvalidDescriptionException("description cannot be null");}
-//        if (organization_id == null){throw new InvalidIdException("organization_id cannot be null");}
+            TenderStatuses status,
+            ServiceTypes service_type,
+            Timestamp created_at) {
 
         this.id = id;
         this.version = version;
@@ -41,7 +47,9 @@ public class Tender {
         this.name = name;
         this.creatorUsername = creatorUsername;
         this.organization_id = organization_id;
-        this.tender_status = tender_status;
+        this.status = status;
+        this.service_type = service_type;
+        this.created_at = created_at;
     }
 
     public Tender() {}
