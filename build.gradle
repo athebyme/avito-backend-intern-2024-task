@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '2.1.4.RELEASE'
+	id 'org.springframework.boot' version '2.1.17.RELEASE'
 	id 'java'
 }
 
@@ -16,20 +16,23 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-
-	compile("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
 	implementation 'org.postgresql:postgresql:42.7.2'
-	compile('mysql:mysql-connector-java')
-	runtimeOnly 'org.postgresql:postgresql'
+	implementation 'mysql:mysql-connector-java'
 
-	annotationProcessor 'org.projectlombok:lombok:1.18.34'
 	compileOnly 'org.projectlombok:lombok:1.18.34'
+	annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 test {
     useJUnit()
+
+	jvmArgs "-DPOSTGRES_JDBC_URL=${System.getenv('POSTGRES_JDBC_URL')}"
+	jvmArgs "-DPOSTGRES_USERNAME=${System.getenv('POSTGRES_USERNAME')}"
+	jvmArgs "-DPOSTGRES_PASSWORD=${System.getenv('POSTGRES_PASSWORD')}"
+
     maxHeapSize = '1G'
 }
