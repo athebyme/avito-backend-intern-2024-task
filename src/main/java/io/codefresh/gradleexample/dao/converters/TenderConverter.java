@@ -1,6 +1,6 @@
 package io.codefresh.gradleexample.dao.converters;
 
-import io.codefresh.gradleexample.dao.dto.TenderDTO;
+import io.codefresh.gradleexample.dao.dto.tenders.TenderDTO;
 import io.codefresh.gradleexample.dao.entities.tenders.Tender;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,8 @@ public class TenderConverter {
                 tender.getName(),
                 tender.getCreatorUsername(),
                 tender.getOrganization_id(),
-                tender.getTender_status()
+                tender.getStatus(),
+                tender.getCreated_at()
         );
     }
 
@@ -26,7 +27,9 @@ public class TenderConverter {
                 dto.getName(),
                 dto.getCreatorUsername(),
                 dto.getOrganization_id(),
-                dto.getTender_status()
+                dto.getTender_status(),
+                null,
+                dto.getCreated_at()
         );
     }
 }
