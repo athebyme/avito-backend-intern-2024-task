@@ -1,10 +1,10 @@
 package io.codefresh.gradleexample.dao.converters;
 
 import io.codefresh.gradleexample.dao.dto.EmployeeDTO;
-import io.codefresh.gradleexample.dao.entities.users.EmployeeEntity;
+import io.codefresh.gradleexample.dao.entities.users.Employee;
 
 public class EmployeeConverter {
-    public static EmployeeDTO toDTO(EmployeeEntity entity) {
+    public static EmployeeDTO toDTO(Employee entity) {
         return new EmployeeDTO(
                 entity.getId(),
                 entity.getUsername(),
@@ -13,8 +13,8 @@ public class EmployeeConverter {
         );
     }
 
-    public static EmployeeEntity toEntity(EmployeeDTO dto) {
-        EmployeeEntity entity = new EmployeeEntity();
+    public static Employee toEntity(EmployeeDTO dto) {
+        Employee entity = new Employee();
         entity.setId(dto.getId());
         entity.setUsername(dto.getUsername());
         entity.setFirst_name(dto.getFirstName());

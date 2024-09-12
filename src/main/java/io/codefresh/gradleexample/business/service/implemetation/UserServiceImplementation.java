@@ -3,7 +3,7 @@ package io.codefresh.gradleexample.business.service.implemetation;
 import io.codefresh.gradleexample.business.service.UserServiceInterface;
 import io.codefresh.gradleexample.dao.converters.EmployeeConverter;
 import io.codefresh.gradleexample.dao.dto.EmployeeDTO;
-import io.codefresh.gradleexample.dao.entities.users.EmployeeEntity;
+import io.codefresh.gradleexample.dao.entities.users.Employee;
 import io.codefresh.gradleexample.dao.repository.UserRepository;
 import io.codefresh.gradleexample.exceptions.service.EmployeeNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,19 +25,19 @@ public class UserServiceImplementation implements UserServiceInterface {
 
     @Override
     public EmployeeDTO createEmployee(EmployeeDTO employeeDTO) {
-        EmployeeEntity employeeEntity = EmployeeConverter.toEntity(employeeDTO);
-        employeeEntity.setCreated_at(new Timestamp(System.currentTimeMillis()));
-        employeeEntity.setUpdated_at(employeeEntity.getCreated_at());
+        Employee employee = EmployeeConverter.toEntity(employeeDTO);
+        employee.setCreated_at(new Timestamp(System.currentTimeMillis()));
+        employee.setUpdated_at(employee.getCreated_at());
 
-        employeeEntity = userRepository.save(employeeEntity);
+        employee = userRepository.save(employee);
 
-        return EmployeeConverter.toDTO(employeeEntity);
+        return EmployeeConverter.toDTO(employee);
     }
 
 
     @Override
     public EmployeeDTO updateEmployee(UUID id, EmployeeDTO employeeDTO) {
-        EmployeeEntity existingEmployee = userRepository.findById(id)
+        Employee existingEmployee = userRepository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException("Employee not found"));
 
         existingEmployee.setUsername(employeeDTO.getUsername());
@@ -57,9 +57,9 @@ public class UserServiceImplementation implements UserServiceInterface {
 
     @Override
     public EmployeeDTO getEmployeeById(UUID id) {
-        EmployeeEntity employeeEntity = userRepository.findById(id)
+        Employee employee = userRepository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException("Employee not found"));
-        return EmployeeConverter.toDTO(employeeEntity);
+        return EmployeeConverter.toDTO(employee);
     }
 
     @Override

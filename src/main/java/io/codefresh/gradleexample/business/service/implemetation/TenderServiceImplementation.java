@@ -4,7 +4,7 @@ import io.codefresh.gradleexample.business.service.TenderServiceInterface;
 import io.codefresh.gradleexample.dao.converters.TenderConverter;
 import io.codefresh.gradleexample.dao.dto.TenderDTO;
 import io.codefresh.gradleexample.dao.entities.tenders.ServiceTypes;
-import io.codefresh.gradleexample.dao.entities.tenders.TenderEntity;
+import io.codefresh.gradleexample.dao.entities.tenders.Tender;
 import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
 import io.codefresh.gradleexample.dao.repository.TenderRepository;
 import io.codefresh.gradleexample.exceptions.service.TenderNotFoundException;
@@ -30,7 +30,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
 
     @Override
     public List<TenderDTO> getAllTenders(Integer limit, Integer offset, ServiceTypes serviceType) {
-        List<TenderEntity> tenders = tenderRepository.findAll();
+        List<Tender> tenders = tenderRepository.findAll();
         if (limit != null){
             tenders = tenders.subList(0, limit);
         }
@@ -49,7 +49,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
 
     @Override
     public List<TenderDTO> getTendersByUsername(Integer limit, Integer offset, String username) {
-        List<TenderEntity> entities = tenderRepository.findByName(username);
+        List<Tender> entities = tenderRepository.findByName(username);
         if (entities == null) {
             throw new TenderNotFoundException(String.format("%s not found", username));
         }
@@ -67,7 +67,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
 
     @Override
     public TenderDTO createTender(String name, String description, ServiceTypes serviceType, UUID organization_id, String creatorUsername) {
-        TenderEntity tender = new TenderEntity();
+        Tender tender = new Tender();
         try{
             tender.setName(name);
             tender.setDescription(description);
@@ -85,7 +85,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
 
     @Override
     public TenderStatuses tenderStatuses(UUID tenderID, String username) {
-        TenderEntity tender = tenderRepository.findByName(username).stream().filter(p -> p.getId().equals(tenderID)).findFirst().orElse(null);
+        Tender tender = tenderRepository.findByName(username).stream().filter(p -> p.getId().equals(tenderID)).findFirst().orElse(null);
         if (tender == null) {
             throw new TenderNotFoundException(String.format("%s not found", tenderID));
         }
