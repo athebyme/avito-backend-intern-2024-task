@@ -1,14 +1,16 @@
 package io.codefresh.gradleexample.dao.entities.organizations;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.UUID;
 
 
 @Entity
 public class OrganizationResponsible {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     UUID id;
-    UUID organization_id;
-    UUID user_id;
+    @Column(name = "organization_id")
+    UUID organizationId;
+    @Column(name = "user_id")
+    UUID employeeId;
 }
