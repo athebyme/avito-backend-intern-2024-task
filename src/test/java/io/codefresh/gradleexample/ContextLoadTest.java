@@ -10,6 +10,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ContextLoadTest {
+
     @Test
     public void contextLoads() {
         assertEquals("Expected correct message","Hello World","Hello "+"World");
