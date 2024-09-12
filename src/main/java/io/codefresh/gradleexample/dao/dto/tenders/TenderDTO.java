@@ -1,4 +1,4 @@
-package io.codefresh.gradleexample.dao.dto;
+package io.codefresh.gradleexample.dao.dto.tenders;
 
 import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
 import io.codefresh.gradleexample.exceptions.dto_exceptions.InvalidDescriptionException;
@@ -30,7 +30,8 @@ public class TenderDTO {
             String name,
             String creatorUsername,
             UUID organization_id,
-            TenderStatuses tender_status){
+            TenderStatuses tender_status,
+            Timestamp created_at){
         if (id == null){throw new InvalidIdException("id cannot be null");}
         if (version == null){throw new InvalidVersionException("version cannot be null");}
         if (name == null || creatorUsername == null){throw new InvalidUsernameException("name cannot be null");}
@@ -44,5 +45,6 @@ public class TenderDTO {
         this.creatorUsername = creatorUsername;
         this.organization_id = organization_id;
         this.tender_status = tender_status;
+        this.created_at = created_at;
     }
 }
