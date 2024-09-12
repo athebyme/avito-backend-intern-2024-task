@@ -2,7 +2,9 @@ package io.codefresh.gradleexample.dao.converters;
 
 import io.codefresh.gradleexample.dao.dto.TenderDTO;
 import io.codefresh.gradleexample.dao.entities.tenders.Tender;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TenderConverter {
     public static TenderDTO toDTO(Tender tender){
         return new TenderDTO(

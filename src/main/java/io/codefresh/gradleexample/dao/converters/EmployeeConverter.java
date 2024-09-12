@@ -3,7 +3,9 @@ package io.codefresh.gradleexample.dao.converters;
 
 import io.codefresh.gradleexample.dao.dto.EmployeeDTO;
 import io.codefresh.gradleexample.dao.entities.users.Employee;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EmployeeConverter {
     public static EmployeeDTO toDTO(Employee entity) {
         return new EmployeeDTO(
