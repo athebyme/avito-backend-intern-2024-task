@@ -11,4 +11,5 @@ public interface UserServiceInterface {
     void deleteEmployee(UUID id);
     EmployeeDTO getEmployeeById(UUID id);
     List<EmployeeDTO> getAllEmployees();
+    UUID getEmployeeIdByUsername(String username);
 }

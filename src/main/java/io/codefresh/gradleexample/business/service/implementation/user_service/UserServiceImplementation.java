@@ -1,4 +1,4 @@
-package io.codefresh.gradleexample.business.service.implemetation;
+package io.codefresh.gradleexample.business.service.implementation.user_service;
 
 import io.codefresh.gradleexample.business.service.UserServiceInterface;
 import io.codefresh.gradleexample.dao.converters.EmployeeConverter;
@@ -68,5 +68,11 @@ public class UserServiceImplementation implements UserServiceInterface {
                 .stream()
                 .map(EmployeeConverter::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public UUID getEmployeeIdByUsername(String username) {
+        Employee employee = userRepository.findUserByUsername(username);
+        return employee.getId();
     }
 }

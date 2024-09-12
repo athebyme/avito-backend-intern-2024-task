@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface TenderRepository extends JpaRepository<Tender, UUID> {
-    List<Tender> findByName(String name);
+    List<Tender> findByCreatorUsername(String name);
 }

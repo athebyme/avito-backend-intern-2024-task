@@ -1,6 +1,6 @@
 package io.codefresh.gradleexample.business.service;
 
-import io.codefresh.gradleexample.dao.dto.TenderDTO;
+import io.codefresh.gradleexample.dao.dto.tenders.TenderDTO;
 import io.codefresh.gradleexample.dao.entities.tenders.ServiceTypes;
 import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
 
