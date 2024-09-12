@@ -10,7 +10,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-public class TenderEntity {
+public class Tender {
     @Id
     UUID id;
     Integer version;
@@ -21,7 +21,7 @@ public class TenderEntity {
     TenderStatuses tender_status;
     ServiceTypes service_type;
 
-    public TenderEntity(
+    public Tender(
             UUID id,
             Integer version,
             String description,
@@ -44,5 +44,5 @@ public class TenderEntity {
         this.tender_status = tender_status;
     }
 
-    public TenderEntity() {}
+    public Tender() {}
 }
