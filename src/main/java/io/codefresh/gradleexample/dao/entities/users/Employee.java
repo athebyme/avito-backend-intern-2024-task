@@ -12,7 +12,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-public class EmployeeEntity
+public class Employee
 {
     @Id
     UUID id;

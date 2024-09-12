@@ -6,12 +6,12 @@ import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
-public class OrganizationEntity {
+public class Organization {
     @Id
     UUID id;
     String name;
     String description;
-    OrganizationTypesEnum type;
+    OrganizationTypes type;
     Timestamp created_at;
     Timestamp updated_at;
 }

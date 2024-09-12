@@ -6,11 +6,9 @@ import java.util.UUID;
 
 
 @Entity
-public class OrganizationResponsibleEntity {
+public class OrganizationResponsible {
     @Id
     UUID id;
-    @Id
     UUID organization_id;
-    @Id
     UUID user_id;
 }
