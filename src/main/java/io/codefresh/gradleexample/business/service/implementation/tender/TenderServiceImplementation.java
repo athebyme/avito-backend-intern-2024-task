@@ -10,7 +10,7 @@ import io.codefresh.gradleexample.dao.entities.tenders.ServiceTypes;
 import io.codefresh.gradleexample.dao.entities.tenders.Tender;
 import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
 import io.codefresh.gradleexample.dao.repository.TenderRepository;
-import io.codefresh.gradleexample.exceptions.service.EmployeeHasNoResponsible;
+import io.codefresh.gradleexample.exceptions.service.EmployeeHasNoResponsibleException;
 import io.codefresh.gradleexample.exceptions.service.EmployeeNotFoundException;
 import io.codefresh.gradleexample.exceptions.service.TenderNotFoundException;
 import org.slf4j.Logger;
@@ -95,7 +95,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
         }
 
         if (!tenderResponsibleService.hasResponsible(organization_id, userID)){
-            throw new EmployeeHasNoResponsible("Employee not found");
+            throw new EmployeeHasNoResponsibleException("Employee not found");
         }
         try{
 
