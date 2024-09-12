@@ -1,7 +1,8 @@
 package io.codefresh.gradleexample.web.controllers;
 
 import io.codefresh.gradleexample.business.service.TenderServiceInterface;
-import io.codefresh.gradleexample.dao.dto.TenderDTO;
+import io.codefresh.gradleexample.dao.dto.tenders.TenderCreationResponse;
+import io.codefresh.gradleexample.dao.dto.tenders.TenderDTO;
 import io.codefresh.gradleexample.dao.entities.tenders.ServiceTypes;
 import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,5 +45,17 @@ public class TenderController {
             @RequestParam(name = "username", required = false) String username
     ) {
         return tenderService.tenderStatuses(tenderID, username);
+    }
+
+    @PostMapping("/new")
+    public TenderDTO createTender(
+            @RequestBody() TenderCreationResponse tenderDTO
+    ){
+        return tenderService.createTender(
+                tenderDTO.getName(),
+                tenderDTO.getDescription(),
+                tenderDTO.getServiceType(),
+                tenderDTO.getOrganizationId(),
+                tenderDTO.getCreatorUsername());
     }
 }
