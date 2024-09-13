@@ -12,4 +12,5 @@ public interface UserServiceInterface {
     EmployeeDTO getEmployeeById(UUID id);
     List<EmployeeDTO> getAllEmployees();
     UUID getEmployeeIdByUsername(String username);
+    boolean isEmployeeExistByUsername(String username);
 }

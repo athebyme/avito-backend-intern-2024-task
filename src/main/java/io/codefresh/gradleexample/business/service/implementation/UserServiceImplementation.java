@@ -1,4 +1,4 @@
-package io.codefresh.gradleexample.business.service.implementation.user_service;
+package io.codefresh.gradleexample.business.service.implementation;
 
 import io.codefresh.gradleexample.business.service.UserServiceInterface;
 import io.codefresh.gradleexample.dao.converters.EmployeeConverter;
@@ -38,7 +38,7 @@ public class UserServiceImplementation implements UserServiceInterface {
     @Override
     public EmployeeDTO updateEmployee(UUID id, EmployeeDTO employeeDTO) {
         Employee existingEmployee = userRepository.findById(id)
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found"));
+                .orElseThrow(() -> new EmployeeNotFoundException("Пользователь не существует или некорректен."));
 
         existingEmployee.setUsername(employeeDTO.getUsername());
         existingEmployee.setFirst_name(employeeDTO.getFirstName());
@@ -58,7 +58,7 @@ public class UserServiceImplementation implements UserServiceInterface {
     @Override
     public EmployeeDTO getEmployeeById(UUID id) {
         Employee employee = userRepository.findById(id)
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found"));
+                .orElseThrow(() -> new EmployeeNotFoundException("Пользователь не существует или некорректен."));
         return EmployeeConverter.toDTO(employee);
     }
 
@@ -73,6 +73,14 @@ public class UserServiceImplementation implements UserServiceInterface {
     @Override
     public UUID getEmployeeIdByUsername(String username) {
         Employee employee = userRepository.findUserByUsername(username);
+        if (employee == null) {
+            return null;
+        }
         return employee.getId();
+    }
+
+    @Override
+    public boolean isEmployeeExistByUsername(String username) {
+        return userRepository.findUserByUsername(username) != null;
     }
 }
