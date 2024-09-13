@@ -1,13 +1,13 @@
 package io.codefresh.gradleexample.web.controllers;
 
-import io.codefresh.gradleexample.business.service.TenderServiceInterface;
-import io.codefresh.gradleexample.dao.dto.tenders.TenderCreationResponse;
+import io.codefresh.gradleexample.business.service.tenders.TenderServiceInterface;
+import io.codefresh.gradleexample.dao.dto.tenders.TenderCreationRequest;
 import io.codefresh.gradleexample.dao.dto.tenders.TenderDTO;
 import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
-import io.codefresh.gradleexample.exceptions.service.EmployeeHasNoResponsibleException;
-import io.codefresh.gradleexample.exceptions.service.EmployeeNotFoundException;
+import io.codefresh.gradleexample.exceptions.service.employee.EmployeeHasNoResponsibleException;
+import io.codefresh.gradleexample.exceptions.service.employee.EmployeeNotFoundException;
 import io.codefresh.gradleexample.exceptions.service.InvalidEnumException;
-import io.codefresh.gradleexample.exceptions.service.TenderNotFoundException;
+import io.codefresh.gradleexample.exceptions.service.tenders.TenderNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +57,7 @@ public class TenderController {
 
     @PostMapping("/new")
     public TenderDTO createTender(
-            @RequestBody() TenderCreationResponse tenderDTO
+            @RequestBody() TenderCreationRequest tenderDTO
     ){
         return tenderService.createTender(
                 tenderDTO.getName(),
@@ -85,10 +85,8 @@ public class TenderController {
         try {
             TenderDTO updatedTender = tenderService.editTender(tenderId, username, updates);
             return ResponseEntity.ok(updatedTender);
-        } catch (TenderNotFoundException ex) {
+        } catch (TenderNotFoundException | EmployeeNotFoundException ex) {
             return errorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (EmployeeNotFoundException ex) {
-            return errorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (EmployeeHasNoResponsibleException ex) {
             return errorResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
         } catch (InvalidEnumException ex) {

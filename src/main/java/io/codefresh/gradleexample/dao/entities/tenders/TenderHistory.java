@@ -12,6 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "tender_history")
 public class TenderHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -25,6 +26,7 @@ public class TenderHistory {
     private String description;
     private String name;
     private String creatorUsername;
+    private UUID organization_id;
 
     @Enumerated(EnumType.STRING)
     private TenderStatuses status;
@@ -33,6 +35,7 @@ public class TenderHistory {
     private ServiceTypes serviceType;
 
     private Timestamp created_at;
+    private Timestamp updated_at;
 
     public TenderHistory(Tender tender) {
         this.tender = tender;

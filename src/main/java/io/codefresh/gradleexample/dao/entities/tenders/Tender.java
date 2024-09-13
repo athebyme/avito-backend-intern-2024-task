@@ -10,28 +10,29 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@Table(name = "tenders")
 public class Tender implements Cloneable{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    UUID id;
-    Integer version;
-    String description;
-    String name;
-    String creatorUsername;
-    UUID organization_id;
+    private UUID id;
+    private Integer version;
+    private String description;
+    private String name;
+    private String creatorUsername;
+    private UUID organization_id;
 
     @Enumerated(EnumType.STRING)
-    TenderStatuses status;
+    private TenderStatuses status;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "serviceType")
-    ServiceTypes service_type;
+    private ServiceTypes service_type;
 
     @Column(name = "created_at")
-    Timestamp created_at;
+    private Timestamp created_at;
 
     @Column(name = "updated_at")
-    Timestamp updated_at;
+    private Timestamp updated_at;
 
     public Tender(
             UUID id,
