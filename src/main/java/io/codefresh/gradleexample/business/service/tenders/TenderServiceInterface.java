@@ -6,7 +6,6 @@ import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public interface TenderServiceInterface {
     List<TenderDTO> getAllTenders(Integer limit, Integer offset, List<String> serviceTypes);
@@ -14,10 +13,10 @@ public interface TenderServiceInterface {
     TenderDTO createTender(String name,
                            String description,
                            ServiceTypes serviceType,
-                           UUID organization_id,
+                           String organization_id,
                            String creatorUsername);
-    TenderStatuses tenderStatuses(UUID tenderID, String username);
-    TenderDTO changeTenderStatus(UUID tenderID, String newStatus, String username);
-    TenderDTO editTender(UUID tenderID, String username, Map<String,Object> updates);
-    TenderDTO rollbackTender(UUID tenderID, Integer version, String username);
+    TenderStatuses tenderStatuses(String tenderID, String username);
+    TenderDTO changeTenderStatus(String tenderID, String newStatus, String username);
+    TenderDTO editTender(String tenderID, String username, Map<String,Object> updates);
+    TenderDTO rollbackTender(String tenderID, Integer version, String username);
 }

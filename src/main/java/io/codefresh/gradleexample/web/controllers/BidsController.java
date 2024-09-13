@@ -4,6 +4,7 @@ package io.codefresh.gradleexample.web.controllers;
 import io.codefresh.gradleexample.business.service.bids.BidServiceInterface;
 import io.codefresh.gradleexample.dao.dto.bids.BidCreationDTO;
 import io.codefresh.gradleexample.dao.dto.bids.BidDTO;
+import io.codefresh.gradleexample.dao.entities.bids.BidReview;
 import io.codefresh.gradleexample.dao.entities.bids.BidsStatuses;
 import io.codefresh.gradleexample.exceptions.service.InvalidEnumException;
 import io.codefresh.gradleexample.exceptions.service.InvalidUUIDException;
@@ -58,7 +59,7 @@ public class BidsController {
 
     @GetMapping("/{tenderId}/list")
     public ResponseEntity<?> getTenderBids(
-            @PathVariable UUID tenderId,
+            @PathVariable String tenderId,
             @RequestParam(name = "username") String username,
             @RequestParam(name = "limit", defaultValue = "5", required = false) Integer limit,
             @RequestParam(name = "offset", defaultValue = "0", required = false) Integer offset
@@ -75,7 +76,7 @@ public class BidsController {
 
     @GetMapping("/{bidId}/status")
     public ResponseEntity<?> getBidStatus(
-            @PathVariable UUID bidId,
+            @PathVariable String bidId,
             @RequestParam(name = "username") String username) {
         try{
             BidsStatuses bidsStatuses = bidService.getBidsStatuses(bidId, username);
@@ -175,7 +176,6 @@ public class BidsController {
             return errorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     private ResponseEntity<Map<String, String>> errorResponse(String message, HttpStatus status) {
         Map<String, String> responseBody = new HashMap<>();

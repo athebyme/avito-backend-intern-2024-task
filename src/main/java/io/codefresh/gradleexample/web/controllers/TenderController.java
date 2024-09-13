@@ -17,7 +17,6 @@ import javax.persistence.EntityNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/tenders")
@@ -49,7 +48,7 @@ public class TenderController {
 
     @GetMapping("/{tenderID}/status")
     public TenderStatuses getTenderStatus(
-            @PathVariable UUID tenderID,
+            @PathVariable String tenderID,
             @RequestParam(name = "username", required = false) String username
     ) {
         return tenderService.tenderStatuses(tenderID, username);
@@ -69,7 +68,7 @@ public class TenderController {
 
     @PutMapping("/{tenderID}/status")
     public TenderDTO updateTenderStatus(
-            @PathVariable UUID tenderID,
+            @PathVariable String tenderID,
             @RequestParam(name = "status") String status,
             @RequestParam(name = "username") String username
     ){
@@ -78,7 +77,7 @@ public class TenderController {
 
     @PatchMapping("/{tenderId}/edit")
     public ResponseEntity<?> editTender(
-            @PathVariable UUID tenderId,
+            @PathVariable String tenderId,
             @RequestParam(name = "username") String username,
             @RequestBody Map<String, Object> updates
     ) {
@@ -98,7 +97,7 @@ public class TenderController {
 
     @PutMapping("/{tenderId}/rollback/{version}")
     public ResponseEntity<?> rollbackTenderVersion(
-            @PathVariable UUID tenderId,
+            @PathVariable String tenderId,
             @PathVariable int version,
             @RequestParam String username) {
 
@@ -113,8 +112,6 @@ public class TenderController {
             return errorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
-
 
     @ExceptionHandler(TenderNotFoundException.class)
     @ResponseBody

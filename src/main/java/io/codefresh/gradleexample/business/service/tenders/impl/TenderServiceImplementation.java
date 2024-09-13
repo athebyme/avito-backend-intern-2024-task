@@ -11,6 +11,7 @@ import io.codefresh.gradleexample.dao.entities.tenders.ServiceTypes;
 import io.codefresh.gradleexample.dao.entities.tenders.Tender;
 import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
 import io.codefresh.gradleexample.dao.repository.tenders.TenderRepository;
+import io.codefresh.gradleexample.exceptions.service.InvalidUUIDException;
 import io.codefresh.gradleexample.exceptions.service.employee.EmployeeHasNoResponsibleException;
 import io.codefresh.gradleexample.exceptions.service.employee.EmployeeNotFoundException;
 import io.codefresh.gradleexample.exceptions.service.InvalidEnumException;
@@ -99,14 +100,16 @@ public class TenderServiceImplementation implements TenderServiceInterface {
     }
 
     @Override
-    public TenderDTO createTender(String name, String description, ServiceTypes serviceType, UUID organization_id, String creatorUsername) {
+    public TenderDTO createTender(String name, String description, ServiceTypes serviceType, String organization_id, String creatorUsername) {
         UUID userID = userService.getEmployeeIdByUsername(creatorUsername);
+
+        checkUUID(organization_id);
 
         if (userID == null) {
             throw new EmployeeNotFoundException("Пользователь не существует или некорректен.");
         }
 
-        if (!tenderResponsibleService.hasResponsible(organization_id, userID)){
+        if (!tenderResponsibleService.hasResponsible(UUID.fromString(organization_id), userID)){
             throw new EmployeeHasNoResponsibleException("Недостаточно прав для выполнения действия.");
         }
 
@@ -116,7 +119,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
                     .name(name)
                     .description(description)
                     .serviceType(serviceType)
-                    .organization_id(organization_id)
+                    .organization_id(UUID.fromString(organization_id))
                     .creatorName(creatorUsername)
                     .version(1)
                     .status(TenderStatuses.Created);
@@ -133,9 +136,11 @@ public class TenderServiceImplementation implements TenderServiceInterface {
     }
 
     @Override
-    public TenderStatuses tenderStatuses(UUID tenderID, String username) {
+    public TenderStatuses tenderStatuses(String tenderID, String username) {
 
-        Optional<Tender> tender = tenderRepository.findById(tenderID);
+        checkUUID(tenderID);
+
+        Optional<Tender> tender = tenderRepository.findById(UUID.fromString(tenderID));
         if (!tender.isPresent()) {
             throw new TenderNotFoundException("Тендер не найден.");
         }
@@ -152,13 +157,15 @@ public class TenderServiceImplementation implements TenderServiceInterface {
     }
 
     @Override
-    public TenderDTO changeTenderStatus(UUID tenderID, String newStatus, String username) {
+    public TenderDTO changeTenderStatus(String tenderID, String newStatus, String username) {
+
+        checkUUID(tenderID);
 
         if (!isValidEnumValue(new ArrayList<>(Collections.singleton(newStatus)), TenderStatuses.class)){
             throw new InvalidEnumException("Неверный формат запроса или его параметры.");
         }
 
-        Optional<Tender> tender = tenderRepository.findById(tenderID);
+        Optional<Tender> tender = tenderRepository.findById(UUID.fromString(tenderID));
         if (!tender.isPresent()) {
             throw new TenderNotFoundException("Тендер не найден.");
         }
@@ -180,9 +187,10 @@ public class TenderServiceImplementation implements TenderServiceInterface {
 
     @Transactional
     @Override
-    public TenderDTO editTender(UUID tenderId, String username, Map<String, Object> updates) {
+    public TenderDTO editTender(String tenderId, String username, Map<String, Object> updates) {
 
-        Tender tender = this.validateTender(tenderId, username);
+        checkUUID(tenderId);
+        Tender tender = this.validateTender(UUID.fromString(tenderId), username);
 
         if (updates.containsKey("serviceType")){
             if (!isValidEnumValue(
@@ -251,9 +259,10 @@ public class TenderServiceImplementation implements TenderServiceInterface {
     }
 
     @Override
-    public TenderDTO rollbackTender(UUID tenderID, Integer targetVersion, String username) {
-        this.validateTender(tenderID, username);
-        return tenderHistoryService.rollbackTender(tenderID, targetVersion, username);
+    public TenderDTO rollbackTender(String tenderID, Integer targetVersion, String username) {
+        checkUUID(tenderID);
+        this.validateTender(UUID.fromString(tenderID), username);
+        return tenderHistoryService.rollbackTender(UUID.fromString(tenderID), targetVersion, username);
     }
 
     private <T extends Enum<T>> boolean isValidEnumValue(List<String> values,
@@ -289,5 +298,12 @@ public class TenderServiceImplementation implements TenderServiceInterface {
             throw new EmployeeHasNoResponsibleException("Недостаточно прав для выполнения действия.");
         }
         return tender;
+    }
+    private void checkUUID(String uuid){
+        try{
+            UUID.fromString(uuid);
+        }catch (IllegalArgumentException e){
+            throw new InvalidUUIDException("Неверный формат запроса или его параметры.");
+        }
     }
 }

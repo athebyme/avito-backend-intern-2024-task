@@ -6,9 +6,11 @@ import io.codefresh.gradleexample.business.service.tenders.TenderResponsibleServ
 import io.codefresh.gradleexample.business.service.users.UserServiceInterface;
 import io.codefresh.gradleexample.dao.builders.bid.BidBuilderBase;
 import io.codefresh.gradleexample.dao.converters.bids.BidConverter;
+import io.codefresh.gradleexample.dao.dto.EmployeeDTO;
 import io.codefresh.gradleexample.dao.dto.bids.BidDTO;
 import io.codefresh.gradleexample.dao.entities.bids.*;
 import io.codefresh.gradleexample.dao.entities.tenders.Tender;
+import io.codefresh.gradleexample.dao.entities.users.Employee;
 import io.codefresh.gradleexample.dao.repository.bids.BidRepository;
 import io.codefresh.gradleexample.dao.repository.bids.BidReviewRepository;
 import io.codefresh.gradleexample.dao.repository.bids.DecisionRepository;
@@ -106,18 +108,19 @@ public class BidServiceImplementation implements BidServiceInterface {
     }
 
     @Override
-    public List<BidDTO> getTenderBids(Integer limit, Integer offset, String username, UUID tenderId) {
-        validate(tenderId, username);
+    public List<BidDTO> getTenderBids(Integer limit, Integer offset, String username, String tenderId) {
+        checkUUID(tenderId);
+        validate(UUID.fromString(tenderId), username);
         UUID userID = userService.getEmployeeIdByUsername(username);
         if (bidRepository.findBidsByAuthorId(userID).isEmpty()){
             throw new BidNotFoundException("Тендер или предложение не найдено.");
         }
-        Tender tender = tenderRepository.findByCreatorUsername(username).stream().filter(p -> p.getId() == tenderId).findFirst().orElse(null);
+        Tender tender = tenderRepository.findByCreatorUsername(username).stream().filter(p -> Objects.equals(p.getId(), UUID.fromString(tenderId))).findFirst().orElse(null);
         if (tender == null){
             throw new TenderNotFoundException("Тендер или предложение не найдено.");
         }
 
-        List<Bid> bids = bidRepository.findBidsByTenderId(tenderId);
+        List<Bid> bids = bidRepository.findBidsByTenderId(UUID.fromString(tenderId));
         if (bids.isEmpty()) {
             throw new BidNotFoundException("Предложения не найдены");
         }
@@ -143,12 +146,13 @@ public class BidServiceImplementation implements BidServiceInterface {
     }
 
     @Override
-    public BidsStatuses getBidsStatuses(UUID bidId, String username) {
+    public BidsStatuses getBidsStatuses(String bidId, String username) {
         UUID userId = checkUserExist(username);
-        Bid bid = bidRepository.findById(bidId).orElse(null);
+        checkUUID(bidId);
+        Bid bid = bidRepository.findById(UUID.fromString(bidId)).orElse(null);
 
         checkUserExist(username);
-        checkUserResponsesBid(bidId, userId);
+        checkUserResponsesBid(UUID.fromString(bidId), userId);
         if (bid == null){
             throw new BidNotFoundException("Предложение не найдено.");
         }
@@ -317,11 +321,9 @@ public class BidServiceImplementation implements BidServiceInterface {
         review.setBid(bid);
 
         bid.setReview(review);
+        bid.setReviewDescription(review.getDescription());
         bidRepository.save(bid);
-        bidReviewRepository.save(review);
     }
-
-
 
     private void validate(UUID tenderID, String username){
         Optional<Tender> existingTender = tenderRepository.findById(tenderID);

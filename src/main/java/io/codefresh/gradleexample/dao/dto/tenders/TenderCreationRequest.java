@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class TenderCreationRequest {
-    private UUID organizationId;
+    private String organizationId;
     private String creatorUsername;
     private String description;
     private String name;
@@ -24,7 +24,7 @@ public class TenderCreationRequest {
             String description,
             String name,
             String creatorUsername,
-            UUID organizationId,
+            String organizationId,
             ServiceTypes serviceType){
         if (name == null || creatorUsername == null){throw new InvalidUsernameException("name cannot be null");}
         if (description == null) {throw new InvalidDescriptionException("description cannot be null");}
