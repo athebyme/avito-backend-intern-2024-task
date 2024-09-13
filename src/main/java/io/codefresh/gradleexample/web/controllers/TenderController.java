@@ -108,11 +108,11 @@ public class TenderController {
             TenderDTO updatedTender = tenderService.rollbackTender(tenderId, version, username);
             return ResponseEntity.ok(updatedTender);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", e.getMessage()));
+            return errorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (EmployeeHasNoResponsibleException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("reason", e.getMessage()));
+            return errorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (InvalidEnumException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", e.getMessage()));
+            return errorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
