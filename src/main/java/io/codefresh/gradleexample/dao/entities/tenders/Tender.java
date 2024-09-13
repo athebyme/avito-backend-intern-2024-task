@@ -10,7 +10,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-public class Tender {
+public class Tender implements Cloneable{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     UUID id;
@@ -29,6 +29,9 @@ public class Tender {
 
     @Column(name = "created_at")
     Timestamp created_at;
+
+    @Column(name = "updated_at")
+    Timestamp updated_at;
 
     public Tender(
             UUID id,
@@ -50,7 +53,18 @@ public class Tender {
         this.status = status;
         this.service_type = service_type;
         this.created_at = created_at;
+        this.updated_at = created_at;
     }
 
     public Tender() {}
+
+
+    @Override
+    public Tender clone() {
+        try {
+            return (Tender) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Ошибка клонирования Tender", e);
+        }
+    }
 }
