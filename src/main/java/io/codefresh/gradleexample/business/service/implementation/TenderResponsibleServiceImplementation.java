@@ -1,4 +1,4 @@
-package io.codefresh.gradleexample.business.service.implementation.tender_responsible;
+package io.codefresh.gradleexample.business.service.implementation;
 
 import io.codefresh.gradleexample.business.service.TenderResponsibleServiceInterface;
 import io.codefresh.gradleexample.dao.repository.TenderResponsibleRepository;
