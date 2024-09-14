@@ -6,11 +6,9 @@ import io.codefresh.gradleexample.business.service.tenders.TenderResponsibleServ
 import io.codefresh.gradleexample.business.service.users.UserServiceInterface;
 import io.codefresh.gradleexample.dao.builders.bid.BidBuilderBase;
 import io.codefresh.gradleexample.dao.converters.bids.BidConverter;
-import io.codefresh.gradleexample.dao.dto.EmployeeDTO;
 import io.codefresh.gradleexample.dao.dto.bids.BidDTO;
 import io.codefresh.gradleexample.dao.entities.bids.*;
 import io.codefresh.gradleexample.dao.entities.tenders.Tender;
-import io.codefresh.gradleexample.dao.entities.users.Employee;
 import io.codefresh.gradleexample.dao.repository.bids.BidRepository;
 import io.codefresh.gradleexample.dao.repository.bids.BidReviewRepository;
 import io.codefresh.gradleexample.dao.repository.bids.DecisionRepository;

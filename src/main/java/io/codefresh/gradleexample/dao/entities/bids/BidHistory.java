@@ -6,7 +6,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -31,9 +30,6 @@ public class BidHistory {
     @Enumerated(EnumType.STRING)
     private AuthorType authorType;
 
-    @OneToMany(mappedBy = "bid")
-    private List<Decision> decision;
-
     @Enumerated(EnumType.STRING)
     private BidsStatuses status;
 
@@ -43,7 +39,7 @@ public class BidHistory {
 
     private Integer version;
 
-    @OneToOne(mappedBy = "bid", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "bid")
     private BidReview review;
 
     private String reviewDescription;
@@ -55,7 +51,6 @@ public class BidHistory {
         this.bid = bid;
         this.authorId = bid.getAuthorId();
         this.authorType = bid.getAuthorType();
-        this.decision = bid.getDecision();
         this.status = bid.getStatus();
         this.tenderId = bid.getTenderId();
         this.version = bid.getVersion();
