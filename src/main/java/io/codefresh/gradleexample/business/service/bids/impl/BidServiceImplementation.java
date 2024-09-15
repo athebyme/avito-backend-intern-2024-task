@@ -66,7 +66,9 @@ public class BidServiceImplementation implements BidServiceInterface {
     @Override
     public BidDTO createBid(String name, String description, String tenderId, String authorType, String authorId) {
         String authorUsername = userService.getEmployeeById(UUID.fromString(authorId)).getUsername();
-        validationService.isValidEnumValue(authorType, AuthorType.class);
+        if (!validationService.isValidEnumValue(authorType, AuthorType.class)){
+            throw new InvalidEnumException("Неверный формат запроса или его параметры.");
+        }
         validateTenderExistenceAndUserResponses(tenderId, authorUsername);
 
         bidBuilder.name(name)
