@@ -4,6 +4,7 @@ import io.codefresh.gradleexample.business.service.tenders.TenderServiceInterfac
 import io.codefresh.gradleexample.dao.dto.tenders.TenderCreationRequest;
 import io.codefresh.gradleexample.dao.dto.tenders.TenderDTO;
 import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
+import io.codefresh.gradleexample.exceptions.ErrorResponse;
 import io.codefresh.gradleexample.exceptions.service.employee.EmployeeHasNoResponsibleException;
 import io.codefresh.gradleexample.exceptions.service.employee.EmployeeNotFoundException;
 import io.codefresh.gradleexample.exceptions.service.InvalidEnumException;
@@ -14,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,41 +38,76 @@ public class TenderController {
     }
 
     @GetMapping("/my")
-    public List<TenderDTO> getMyTenders(
+    public ResponseEntity<?> getMyTenders(
             @RequestParam(name = "limit", required = false) Integer limit,
             @RequestParam(name = "offset", required = false) Integer offset,
             @RequestParam(name = "username") String username
     ) {
-        return tenderService.getTendersByUsername(limit, offset, username);
+        try{
+            List<TenderDTO> tenderDTOS = tenderService.getTendersByUsername(limit, offset, username);
+            return ResponseEntity.ok(tenderDTOS);
+        }catch (EmployeeNotFoundException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        }catch (Exception e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{tenderID}/status")
-    public TenderStatuses getTenderStatus(
+    public ResponseEntity<?> getTenderStatus(
             @PathVariable String tenderID,
             @RequestParam(name = "username", required = false) String username
     ) {
-        return tenderService.tenderStatuses(tenderID, username);
+        try{
+            TenderStatuses status = tenderService.getTenderStatus(tenderID, username);
+            return ResponseEntity.ok(status);
+        }catch (EmployeeNotFoundException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        }catch (EmployeeHasNoResponsibleException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.FORBIDDEN);
+        }catch (Exception e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/new")
-    public TenderDTO createTender(
+    public ResponseEntity<?> createTender(
             @RequestBody() TenderCreationRequest tenderDTO
     ){
-        return tenderService.createTender(
+        TenderDTO createdTender = tenderService.createTender(
                 tenderDTO.getName(),
                 tenderDTO.getDescription(),
                 tenderDTO.getServiceType(),
                 tenderDTO.getOrganizationId(),
                 tenderDTO.getCreatorUsername());
+        return ResponseEntity.ok(createdTender);
     }
 
     @PutMapping("/{tenderID}/status")
-    public TenderDTO updateTenderStatus(
+    public ResponseEntity<?> updateTenderStatus(
             @PathVariable String tenderID,
             @RequestParam(name = "status") String status,
             @RequestParam(name = "username") String username
     ){
-        return tenderService.changeTenderStatus(tenderID, status, username);
+        try{
+            TenderDTO updatedTender = tenderService.changeTenderStatus(tenderID, status, username);
+            return ResponseEntity.ok(updatedTender);
+        } catch (EmployeeNotFoundException | TenderNotFoundException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        }catch (EmployeeHasNoResponsibleException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.FORBIDDEN);
+        }catch (Exception e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @PatchMapping("/{tenderId}/edit")
@@ -84,14 +119,18 @@ public class TenderController {
         try {
             TenderDTO updatedTender = tenderService.editTender(tenderId, username, updates);
             return ResponseEntity.ok(updatedTender);
-        } catch (TenderNotFoundException | EmployeeNotFoundException ex) {
-            return errorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (EmployeeHasNoResponsibleException ex) {
-            return errorResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (InvalidEnumException ex) {
-          return errorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (Exception ex) {
-            return errorResponse("Ошибка при обновлении тендера", HttpStatus.BAD_REQUEST);
+        } catch (TenderNotFoundException | EmployeeNotFoundException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (EmployeeHasNoResponsibleException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.FORBIDDEN);
+        } catch (InvalidEnumException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -105,41 +144,14 @@ public class TenderController {
             TenderDTO updatedTender = tenderService.rollbackTender(tenderId, version, username);
             return ResponseEntity.ok(updatedTender);
         } catch (EntityNotFoundException e) {
-            return errorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.NOT_FOUND);
         } catch (EmployeeHasNoResponsibleException e) {
-            return errorResponse(e.getMessage(), HttpStatus.FORBIDDEN);
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.FORBIDDEN);
         } catch (InvalidEnumException e) {
-            return errorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
         }
-    }
-
-    @ExceptionHandler(TenderNotFoundException.class)
-    @ResponseBody
-    public ResponseEntity<Map<String, String>> handleTenderNotFoundException(TenderNotFoundException ex) {
-        return errorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(EmployeeNotFoundException.class)
-    @ResponseBody
-    public ResponseEntity<Map<String, String>> handleEmployeeNotFoundException(EmployeeNotFoundException ex) {
-        return errorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(InvalidEnumException.class)
-    @ResponseBody
-    public ResponseEntity<Map<String, String>> handleInvalidEnumException(InvalidEnumException ex) {
-        return errorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(EmployeeHasNoResponsibleException.class)
-    @ResponseBody
-    public ResponseEntity<Map<String, String>> handleEmployeeHasNoResponsible(EmployeeHasNoResponsibleException ex) {
-        return errorResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
-    }
-
-    private ResponseEntity<Map<String, String>> errorResponse(String message, HttpStatus status) {
-        Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("reason", message);
-        return new ResponseEntity<>(responseBody, status);
     }
 }

@@ -140,7 +140,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
     }
 
     @Override
-    public TenderStatuses tenderStatuses(String tenderID, String username) {
+    public TenderStatuses getTenderStatus(String tenderID, String username) {
         Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
         UUID userID = validationService.checkUserExistAndGetUUIDBack(username);
         authorizationService.checkUserOrganizationResponses(tender.getOrganization_id(), userID);
@@ -241,17 +241,6 @@ public class TenderServiceImplementation implements TenderServiceInterface {
         validateTenderExistenceAndUserResponses(tenderID, username);
         return tenderHistoryService.rollbackTender(UUID.fromString(tenderID), targetVersion, username);
     }
-
-    @Override
-    public Tender getTenderByTenderId(String tenderID) {
-        return validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
-    }
-
-    @Override
-    public boolean checkTenderExists(String tenderID) {
-        return validationService.checkTenderExistsAndIfExistsGetBack(tenderID) != null;
-    }
-
 
     private Tender validateTenderExistenceAndUserResponses(String tenderID, String username) {
         Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
