@@ -54,8 +54,8 @@ public class BidReviewServiceImplementation implements BidReviewServiceInterface
             throw new ReviewsNotFoundException("Отзывы на предложения не найдены.");
         }
 
-        int fromIndex = Math.min(offset, reviews.size());
-        int toIndex = Math.min(offset + limit, reviews.size());
+        int fromIndex = Math.min(offset, reviews.size() - 1);
+        int toIndex = Math.min(offset + limit, reviews.size() - 1);
         return reviews.subList(fromIndex, toIndex);
     }
 }
