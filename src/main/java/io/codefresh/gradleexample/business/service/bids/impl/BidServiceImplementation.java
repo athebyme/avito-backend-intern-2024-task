@@ -2,24 +2,21 @@ package io.codefresh.gradleexample.business.service.bids.impl;
 
 import io.codefresh.gradleexample.business.service.bids.BidHistoryServiceInterface;
 import io.codefresh.gradleexample.business.service.bids.BidServiceInterface;
-import io.codefresh.gradleexample.business.service.tenders.TenderResponsibleServiceInterface;
 import io.codefresh.gradleexample.business.service.users.UserServiceInterface;
+import io.codefresh.gradleexample.business.service.validators.authorization.AuthorizationServiceInterface;
+import io.codefresh.gradleexample.business.service.validators.values.ValidationServiceInterface;
 import io.codefresh.gradleexample.dao.builders.bid.BidBuilderBase;
 import io.codefresh.gradleexample.dao.converters.bids.BidConverter;
 import io.codefresh.gradleexample.dao.dto.bids.BidDTO;
 import io.codefresh.gradleexample.dao.entities.bids.*;
 import io.codefresh.gradleexample.dao.entities.tenders.Tender;
 import io.codefresh.gradleexample.dao.repository.bids.BidRepository;
-import io.codefresh.gradleexample.dao.repository.bids.BidReviewRepository;
 import io.codefresh.gradleexample.dao.repository.bids.DecisionRepository;
 import io.codefresh.gradleexample.dao.repository.tenders.TenderRepository;
 import io.codefresh.gradleexample.exceptions.service.InvalidEnumException;
-import io.codefresh.gradleexample.exceptions.service.InvalidUUIDException;
 import io.codefresh.gradleexample.exceptions.service.bids.BidNotFoundException;
 import io.codefresh.gradleexample.exceptions.service.bids.ReviewAlreadySentException;
 import io.codefresh.gradleexample.exceptions.service.bids.UserAlreadySentDecisionException;
-import io.codefresh.gradleexample.exceptions.service.employee.EmployeeHasNoResponsibleException;
-import io.codefresh.gradleexample.exceptions.service.employee.EmployeeNotFoundException;
 import io.codefresh.gradleexample.exceptions.service.tenders.TenderNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,13 +28,18 @@ import java.util.stream.Collectors;
 @Service
 public class BidServiceImplementation implements BidServiceInterface {
 
+    private static final int QUORUM_SIZE = 3;
+
+
     private final BidRepository bidRepository;
     private final TenderRepository tenderRepository;
-    private final UserServiceInterface userService;
-    private final TenderResponsibleServiceInterface tenderResponsibleService;
-    private final BidHistoryServiceInterface bidHistoryServiceInterface;
     private final DecisionRepository decisionRepository;
-    private final BidReviewRepository bidReviewRepository;
+
+    private final UserServiceInterface userService;
+    private final BidHistoryServiceInterface bidHistoryServiceInterface;
+
+    private final AuthorizationServiceInterface authorizationService;
+    private final ValidationServiceInterface validationService;
 
     private final BidBuilderBase bidBuilder;
 
@@ -46,25 +48,25 @@ public class BidServiceImplementation implements BidServiceInterface {
             BidRepository bidRepository,
             TenderRepository tenderRepository,
             UserServiceInterface userService,
-            TenderResponsibleServiceInterface tenderResponsibleService,
             BidHistoryServiceInterface bidHistoryServiceInterface,
             DecisionRepository decisionRepository,
-            BidReviewRepository bidReviewRepository,
+            AuthorizationServiceInterface authorizationService,
+            ValidationServiceInterface validationService,
             BidBuilderBase bidBuilder) {
         this.bidRepository = bidRepository;
         this.tenderRepository = tenderRepository;
         this.userService = userService;
-        this.tenderResponsibleService = tenderResponsibleService;
         this.bidHistoryServiceInterface = bidHistoryServiceInterface;
         this.decisionRepository = decisionRepository;
-        this.bidReviewRepository = bidReviewRepository;
+        this.authorizationService = authorizationService;
+        this.validationService = validationService;
         this.bidBuilder = bidBuilder;
     }
 
     @Override
     public BidDTO createBid(String name, String description, String tenderId, String authorType, String authorId) {
         String authorUsername = userService.getEmployeeById(UUID.fromString(authorId)).getUsername();
-        validate(UUID.fromString(tenderId), authorUsername);
+        validateTenderExistenceAndUserResponses(tenderId, authorUsername);
         bidBuilder.name(name)
                 .description(description)
                 .authorType(AuthorType.valueOf(authorType))
@@ -80,14 +82,11 @@ public class BidServiceImplementation implements BidServiceInterface {
 
     @Override
     public List<BidDTO> getBidsByUsername(Integer limit, Integer offset, String username) {
-        UUID userID = userService.getEmployeeIdByUsername(username);
-        if (userID == null){
-            throw new EmployeeNotFoundException("Пользователь не существует или некорректен.");
-        }
+        UUID userID = validationService.checkUserExist(username);
         List<Bid> entities = bidRepository.findBidsByAuthorId(userID);
         List<BidDTO> sortedEntities = entities.stream()
                 .map(BidConverter::toDTO)
-                .sorted(Comparator.comparing(BidDTO::getName))  // Сортировка по полю name
+                .sorted(Comparator.comparing(BidDTO::getName))
                 .collect(Collectors.toList());
 
         if (offset != null){
@@ -107,9 +106,8 @@ public class BidServiceImplementation implements BidServiceInterface {
 
     @Override
     public List<BidDTO> getTenderBids(Integer limit, Integer offset, String username, String tenderId) {
-        checkUUID(tenderId);
-        validate(UUID.fromString(tenderId), username);
-        UUID userID = userService.getEmployeeIdByUsername(username);
+        validateTenderExistenceAndUserResponses(tenderId, username);
+        UUID userID = validationService.checkUserExist(username);
         if (bidRepository.findBidsByAuthorId(userID).isEmpty()){
             throw new BidNotFoundException("Тендер или предложение не найдено.");
         }
@@ -145,32 +143,18 @@ public class BidServiceImplementation implements BidServiceInterface {
 
     @Override
     public BidsStatuses getBidsStatuses(String bidId, String username) {
-        UUID userId = checkUserExist(username);
-        checkUUID(bidId);
-        Bid bid = bidRepository.findById(UUID.fromString(bidId)).orElse(null);
-
-        checkUserExist(username);
-        checkUserResponsesBid(UUID.fromString(bidId), userId);
-        if (bid == null){
-            throw new BidNotFoundException("Предложение не найдено.");
-        }
+        Bid bid = validationService.checkBidExists(bidId, username);
         return bid.getStatus();
     }
 
     @Override
     public BidDTO updateBidStatus(String bidId, String status, String username) {
-        UUID bidID = checkUUID(bidId);
-        checkUserExist(username);
 
-        Bid bid = bidRepository.findById(bidID).orElse(null);
-
-        if (bid == null){
-            throw new BidNotFoundException("Предложение не найдено.");
-        }
-        checkUserResponsesBid(bidID, username);
+        Bid bid = validationService.checkBidExists(bidId, username);
+        authorizationService.checkUserBidResponses(bid.getId(), validationService.checkUserExist(username));
 
 
-        if (!isValidEnumValue(status, BidsStatuses.class)){
+        if (!validationService.isValidEnumValue(status, BidsStatuses.class)){
             throw new InvalidEnumException("Неверный формат запроса или его параметры.");
         }
 
@@ -184,13 +168,8 @@ public class BidServiceImplementation implements BidServiceInterface {
     @Override
     public BidDTO updateBid(String bidId, String username, Map<String, Object> updates) {
         checkUpdateParameters(updates);
-        checkBidExists(UUID.fromString(bidId));
-        checkUserExist(username);
-
-        Bid bid = bidRepository.findById(UUID.fromString(bidId)).orElse(null);
-        if (bid == null){
-            throw new BidNotFoundException("Предложение не найдено.");
-        }
+        validationService.checkUserExist(username);
+        Bid bid = validationService.checkBidExists(bidId, username);
 
         bidHistoryServiceInterface.saveBidHistory(bid);
 
@@ -252,23 +231,23 @@ public class BidServiceImplementation implements BidServiceInterface {
 
     @Override
     public BidDTO rollbackBid(String bidId, String username, int version) {
-        checkUUID(bidId);
-        checkUserExist(username);
-        checkBidExists(UUID.fromString(bidId));
-        checkUserResponsesBid(UUID.fromString(bidId), username);
+        UUID userId = validationService.checkUUID(bidId);
+        validationService.checkUserExist(username);
+        validationService.checkBidExists(bidId, username);
+        authorizationService.checkUserBidResponses(UUID.fromString(bidId), userId);
         return bidHistoryServiceInterface.rollbackBid(UUID.fromString(bidId), version, username);
     }
 
 
     @Override
     public void submitDecision(String bidId, String decision, String username) {
-        if(!isValidEnumValue(decision, BidDecision.class)){
+        if(!validationService.isValidEnumValue(decision, BidDecision.class)){
             throw new InvalidEnumException("Решение не может быть отправлено.");
         }
-        checkUUID(bidId);
-        checkBidExists(UUID.fromString(bidId));
-        checkUserExist(username);
-        Bid bid = bidRepository.findById(UUID.fromString(bidId)).get();
+
+        Bid bid = validationService.checkBidExists(bidId, username);
+        validationService.checkUserExist(username);
+
         List<Decision> existingDecisions = decisionRepository.findByBidId(UUID.fromString(bidId));
         if (existingDecisions.stream().anyMatch(d -> d.getUsername().equals(username))) {
             throw new UserAlreadySentDecisionException("Пользователь уже отправил решение");
@@ -287,14 +266,11 @@ public class BidServiceImplementation implements BidServiceInterface {
             return;
         }
 
-        int responsibleCount = 5; // допустим, у нас 5 ответственных лиц
-        int quorum = Math.min(3, responsibleCount);
-
         long approvedCount = existingDecisions.stream()
                 .filter(d -> d.getDecision() == BidDecision.Approved)
                 .count();
 
-        if (approvedCount + (BidDecision.valueOf(decision) == BidDecision.Approved ? 1 : 0) >= quorum) {
+        if (approvedCount + (BidDecision.valueOf(decision) == BidDecision.Approved ? 1 : 0) >= QUORUM_SIZE) {
             bid.setDecisionStatus(BidDecision.Approved);
         } else {
             bid.setDecisionStatus(BidDecision.Quorum);
@@ -305,10 +281,11 @@ public class BidServiceImplementation implements BidServiceInterface {
 
     @Override
     public void submitFeedback(String bidId, String feedback, String username) {
-        checkUUID(bidId);
-        checkBidExists(UUID.fromString(bidId));
-        checkUserExist(username);
-        Bid bid = bidRepository.findById(UUID.fromString(bidId)).get();
+        validationService.checkUUID((bidId));
+        validationService.checkUserExist(UUID.fromString(bidId));
+        validationService.checkUserExist(username);
+
+        Bid bid = validationService.checkBidExists(bidId, username);
         if (bid.getReview() != null) {
             throw new ReviewAlreadySentException("Отзыв уже был отправлен по этому предложению.");
         }
@@ -323,107 +300,40 @@ public class BidServiceImplementation implements BidServiceInterface {
         bidRepository.save(bid);
     }
 
-    private void validate(UUID tenderID, String username){
-        Optional<Tender> existingTender = tenderRepository.findById(tenderID);
-        if (!existingTender.isPresent()){
-            throw new TenderNotFoundException("Тендер не найден.");
-        }
-
-        Tender tender = existingTender.get();
-        UUID userId = checkUserExist(username);
-        checkUserResponsesOrganization(tender.getOrganization_id(), userId);
-    }
-
-    private UUID checkUserExist(String username){
-        UUID userId = userService.getEmployeeIdByUsername(username);
-        if (userId == null) {
-            throw new EmployeeNotFoundException("Пользователь не существует или некорректен.");
-        }
-        return userId;
-    }
-
-    private void checkUserResponsesOrganization(UUID organizationId, UUID userId){
-        if (!tenderResponsibleService.hasResponsible(organizationId, userId)) {
-            throw new EmployeeHasNoResponsibleException("Недостаточно прав для выполнения действия.");
-        }
-    }
-    private void checkUserResponsesBid(UUID bidId, UUID userId){
-        if (!bidRepository.existsBidByIdAndAuthorId(bidId, userId)) {
-            throw new BidNotFoundException("Предложение не найдено.");
-        }
-    }
-    private void checkUserResponsesBid(UUID bidId, String username){
-        UUID userId = userService.getEmployeeIdByUsername(username);
-        if (!bidRepository.existsBidByIdAndAuthorId(bidId, userId)) {
-            throw new BidNotFoundException("Недостаточно прав для выполнения действия.");
-        }
-    }
-    private void checkBidExists(UUID bidId){
-        if (!bidRepository.existsById(bidId)){
-            throw new BidNotFoundException("Предложение не найдено.");
-        }
-    }
-    private UUID checkUUID(String uuid){
-        try{
-            return UUID.fromString(uuid);
-        }catch (IllegalArgumentException e){
-            throw new InvalidUUIDException("Неверный формат запроса или его параметры.");
-        }
-    }
-    private <T extends Enum<T>> boolean isValidEnumValue(List<String> values,
-                                                         Class<T> enumClass) {
-        for (String value : values) {
-            boolean found = false;
-            for (T enumConstant : enumClass.getEnumConstants()) {
-                if (enumConstant.name().equals(value)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                return false;
-            }
-        }
-        return true;
-    }
-    private <T extends Enum<T>> boolean isValidEnumValue(String value,
-                                                         Class<T> enumClass) {
-        for (T enumConstant : enumClass.getEnumConstants()) {
-            if (enumConstant.name().equals(value)) {
-                return true;
-            }
-        }
-        return false;
+    private void validateTenderExistenceAndUserResponses(String tenderID, String username) {
+        Tender tender = validationService.checkTenderExists(tenderID);
+        UUID userId = validationService.checkUserExist(username);
+        authorizationService.checkUserOrganizationResponses(tender.getOrganization_id(), userId);
     }
 
     private void checkUpdateParameters(Map<String, Object> updates){
         if (updates.containsKey("authorType")){
-            if (!isValidEnumValue(String.valueOf(updates.get("authorType")), AuthorType.class)){
+            if (!validationService.isValidEnumValue(String.valueOf(updates.get("authorType")), AuthorType.class)){
                 throw new InvalidEnumException("Данные неправильно сформированы или не соответствуют требованиям.");
             }
         }
 
         if (updates.containsKey("bidDecision")){
-            if (!isValidEnumValue(String.valueOf(updates.get("bidDecision")), BidDecision.class)){
+            if (!validationService.isValidEnumValue(String.valueOf(updates.get("bidDecision")), BidDecision.class)){
                 throw new InvalidEnumException("Данные неправильно сформированы или не соответствуют требованиям.");
             }
         }
         if (updates.containsKey("status")){
-            if (!isValidEnumValue(String.valueOf(updates.get("status")), BidsStatuses.class)){
+            if (!validationService.isValidEnumValue(String.valueOf(updates.get("status")), BidsStatuses.class)){
                 throw new InvalidEnumException("Данные неправильно сформированы или не соответствуют требованиям.");
             }
         }
         if (updates.containsKey("bidId")){
-            checkUUID(updates.containsKey("bidId") ? String.valueOf(updates.get("bidId")) : null);
+            validationService.checkUUID(updates.containsKey("bidId") ? String.valueOf(updates.get("bidId")) : null);
         }
         if (updates.containsKey("authorId")){
-            checkUUID(updates.containsKey("authorId") ? String.valueOf(updates.get("authorId")) : null);
+            validationService.checkUUID((updates.containsKey("authorId") ? String.valueOf(updates.get("authorId")) : null));
         }
         if (updates.containsKey("tenderId")){
-            checkUUID(updates.containsKey("tenderId") ? String.valueOf(updates.get("tenderId")) : null);
+            validationService.checkUUID((updates.containsKey("tenderId") ? String.valueOf(updates.get("tenderId")) : null));
         }
         if (updates.containsKey("reviewId")){
-            checkUUID(updates.containsKey("reviewId") ? String.valueOf(updates.get("reviewId")) : null);
+            validationService.checkUUID((updates.containsKey("reviewId") ? String.valueOf(updates.get("reviewId")) : null));
         }
     }
 }

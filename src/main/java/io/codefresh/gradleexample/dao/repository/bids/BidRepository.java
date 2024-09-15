@@ -10,4 +10,5 @@ public interface BidRepository extends JpaRepository<Bid, UUID> {
     List<Bid> findBidsByAuthorId(UUID bidderId);
     List<Bid> findBidsByTenderId(UUID tenderId);
     boolean existsBidByIdAndAuthorId(UUID bidId, UUID tenderId);
+    List<Bid> findByTenderIdAndAuthorId(UUID tenderId, UUID authorId);
 }

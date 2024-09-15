@@ -7,6 +7,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Application {
 
 	public static void main(String[] args) {
+		setEnvironmentalVariables();
+		SpringApplication.run(Application.class, args);
+	}
+
+	private static void setEnvironmentalVariables(){
 		String serverAddress = System.getenv("SERVER_ADDRESS");
 		if (serverAddress != null) {
 			String[] parts = serverAddress.split(":");
@@ -15,6 +20,5 @@ public class Application {
 				System.setProperty("server.port", parts[1]);
 			}
 		}
-		SpringApplication.run(Application.class, args);
 	}
 }

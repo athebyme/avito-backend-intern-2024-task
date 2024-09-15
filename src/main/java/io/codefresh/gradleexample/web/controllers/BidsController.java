@@ -2,6 +2,7 @@ package io.codefresh.gradleexample.web.controllers;
 
 
 import io.codefresh.gradleexample.business.service.bids.BidServiceInterface;
+import io.codefresh.gradleexample.business.service.review.BidReviewServiceInterface;
 import io.codefresh.gradleexample.dao.dto.bids.BidCreationDTO;
 import io.codefresh.gradleexample.dao.dto.bids.BidDTO;
 import io.codefresh.gradleexample.dao.entities.bids.BidReview;
@@ -22,16 +23,18 @@ import javax.persistence.EntityNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/bids")
 public class BidsController {
     private final BidServiceInterface bidService;
+    private final BidReviewServiceInterface reviewService;
 
     @Autowired
-    public BidsController(BidServiceInterface bidService) {
+    public BidsController(BidServiceInterface bidService,
+                          BidReviewServiceInterface reviewService) {
         this.bidService = bidService;
+        this.reviewService = reviewService;
     }
 
     @PostMapping("/new")
@@ -176,6 +179,31 @@ public class BidsController {
             return errorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/{tenderId}/reviews")
+    public ResponseEntity<?> getBidReviews(
+            @PathVariable String tenderId,
+            @RequestParam String authorUsername,
+            @RequestParam String requesterUsername,
+            @RequestParam(defaultValue = "5") int limit,
+            @RequestParam(defaultValue = "0") int offset
+    ) {
+        try {
+            List<BidReview> reviews = reviewService.getBidReviews(tenderId, authorUsername, requesterUsername, limit, offset);
+            return ResponseEntity.ok(reviews);
+        } catch (InvalidUUIDException e) {
+            return errorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (EmployeeNotFoundException e) {
+            return errorResponse(e.getMessage(),HttpStatus.UNAUTHORIZED);
+        } catch (EmployeeHasNoResponsibleException e) {
+            return errorResponse(e.getMessage(),HttpStatus.FORBIDDEN);
+        } catch (BidNotFoundException | TenderNotFoundException e) {
+            return errorResponse(e.getMessage(),HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return errorResponse(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     private ResponseEntity<Map<String, String>> errorResponse(String message, HttpStatus status) {
         Map<String, String> responseBody = new HashMap<>();

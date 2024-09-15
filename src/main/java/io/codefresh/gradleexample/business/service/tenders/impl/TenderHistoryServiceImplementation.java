@@ -51,7 +51,6 @@ public class TenderHistoryServiceImplementation implements TenderHistoryServiceI
         TenderHistory targetVersion = tenderHistoryRepository.findByTenderIdAndVersion(tenderId, version)
                 .orElseThrow(() -> new EntityNotFoundException("Версия " + version + " для тендера " + tenderId + " не найдена."));
 
-        // Проверка прав пользователя (можно вызывать из основного сервиса, если нужно)
 
         Tender clonedTender = tender.clone();
         clonedTender.setDescription(targetVersion.getDescription());
