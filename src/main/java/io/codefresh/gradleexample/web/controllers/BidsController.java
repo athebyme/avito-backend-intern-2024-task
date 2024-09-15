@@ -5,6 +5,7 @@ import io.codefresh.gradleexample.business.service.bids.BidServiceInterface;
 import io.codefresh.gradleexample.business.service.review.BidReviewServiceInterface;
 import io.codefresh.gradleexample.dao.dto.bids.BidCreationDTO;
 import io.codefresh.gradleexample.dao.dto.bids.BidDTO;
+import io.codefresh.gradleexample.dao.dto.bids.BidReviewDTO;
 import io.codefresh.gradleexample.dao.entities.bids.BidReview;
 import io.codefresh.gradleexample.dao.entities.bids.BidsStatuses;
 import io.codefresh.gradleexample.exceptions.service.InvalidEnumException;
@@ -23,6 +24,7 @@ import javax.persistence.EntityNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/bids")
@@ -190,7 +192,10 @@ public class BidsController {
     ) {
         try {
             List<BidReview> reviews = reviewService.getBidReviews(tenderId, authorUsername, requesterUsername, limit, offset);
-            return ResponseEntity.ok(reviews);
+            List<BidReviewDTO> reviewDTOs = reviews.stream()
+                    .map(BidReviewDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(reviewDTOs);
         } catch (InvalidUUIDException e) {
             return errorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (EmployeeNotFoundException e) {
