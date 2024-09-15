@@ -37,11 +37,18 @@ public class BidReviewServiceImplementation implements BidReviewServiceInterface
 
     public List<BidReview> getBidReviews(String tenderIdStr, String authorUsername, String requesterUsername, int limit, int offset) {
         UUID tenderId = validationService.checkUUID(tenderIdStr);
-        UUID authorId = validationService.checkUserExist(authorUsername);
-        UUID requesterId = validationService.checkUserExist(requesterUsername);
+        System.out.println(tenderId);
 
-        Tender tender = validationService.checkTenderExists(String.valueOf(tenderId));
+        UUID authorId = validationService.checkUserExistAndGetUUIDBack(authorUsername);
+        System.out.println(authorId);
+
+        UUID requesterId = validationService.checkUserExistAndGetUUIDBack(requesterUsername);
+        System.out.println(requesterId);
+
+        Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(String.valueOf(tenderId));
+        System.out.println(tender.toString());
         authorizationService.checkUserOrganizationResponses(tender.getOrganization_id(), requesterId);
+
 
         List<Bid> bids = bidRepository.findByTenderIdAndAuthorId(tenderId, authorId);
         if (bids.isEmpty()) {
@@ -54,8 +61,8 @@ public class BidReviewServiceImplementation implements BidReviewServiceInterface
             throw new ReviewsNotFoundException("Отзывы на предложения не найдены.");
         }
 
-        int fromIndex = Math.min(offset, reviews.size() - 1);
-        int toIndex = Math.min(offset + limit, reviews.size() - 1);
+        int fromIndex = Math.min(offset, reviews.size());
+        int toIndex = Math.min(offset + limit, reviews.size());
         return reviews.subList(fromIndex, toIndex);
     }
 }

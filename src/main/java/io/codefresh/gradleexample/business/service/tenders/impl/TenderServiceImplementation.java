@@ -105,7 +105,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
 
     @Override
     public TenderDTO createTender(String name, String description, ServiceTypes serviceType, String organization_id, String creatorUsername) {
-        UUID userID = validationService.checkUserExist(creatorUsername);
+        UUID userID = validationService.checkUserExistAndGetUUIDBack(creatorUsername);
 
         validationService.checkUUID(organization_id);
 
@@ -141,8 +141,8 @@ public class TenderServiceImplementation implements TenderServiceInterface {
 
     @Override
     public TenderStatuses tenderStatuses(String tenderID, String username) {
-        Tender tender = validationService.checkTenderExists(tenderID);
-        UUID userID = validationService.checkUserExist(username);
+        Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
+        UUID userID = validationService.checkUserExistAndGetUUIDBack(username);
         authorizationService.checkUserOrganizationResponses(tender.getOrganization_id(), userID);
 
         return tender.getStatus();
@@ -155,8 +155,8 @@ public class TenderServiceImplementation implements TenderServiceInterface {
             throw new InvalidEnumException("Неверный формат запроса или его параметры.");
         }
 
-        Tender tender = validationService.checkTenderExists(tenderID);
-        UUID userId = validationService.checkUserExist(username);
+        Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
+        UUID userId = validationService.checkUserExistAndGetUUIDBack(username);
         authorizationService.checkUserOrganizationResponses(tender.getOrganization_id(), userId);
 
         tender.setStatus(TenderStatuses.valueOf(newStatus));
@@ -244,18 +244,18 @@ public class TenderServiceImplementation implements TenderServiceInterface {
 
     @Override
     public Tender getTenderByTenderId(String tenderID) {
-        return validationService.checkTenderExists(tenderID);
+        return validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
     }
 
     @Override
     public boolean checkTenderExists(String tenderID) {
-        return validationService.checkTenderExists(tenderID) != null;
+        return validationService.checkTenderExistsAndIfExistsGetBack(tenderID) != null;
     }
 
 
     private Tender validateTenderExistenceAndUserResponses(String tenderID, String username) {
-        Tender tender = validationService.checkTenderExists(tenderID);
-        UUID userId = validationService.checkUserExist(username);
+        Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
+        UUID userId = validationService.checkUserExistAndGetUUIDBack(username);
         authorizationService.checkUserOrganizationResponses(tender.getOrganization_id(), userId);
         return tender;
     }

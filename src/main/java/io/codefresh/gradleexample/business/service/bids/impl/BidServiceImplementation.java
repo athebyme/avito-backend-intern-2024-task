@@ -82,7 +82,7 @@ public class BidServiceImplementation implements BidServiceInterface {
 
     @Override
     public List<BidDTO> getBidsByUsername(Integer limit, Integer offset, String username) {
-        UUID userID = validationService.checkUserExist(username);
+        UUID userID = validationService.checkUserExistAndGetUUIDBack(username);
         List<Bid> entities = bidRepository.findBidsByAuthorId(userID);
         List<BidDTO> sortedEntities = entities.stream()
                 .map(BidConverter::toDTO)
@@ -107,7 +107,7 @@ public class BidServiceImplementation implements BidServiceInterface {
     @Override
     public List<BidDTO> getTenderBids(Integer limit, Integer offset, String username, String tenderId) {
         validateTenderExistenceAndUserResponses(tenderId, username);
-        UUID userID = validationService.checkUserExist(username);
+        UUID userID = validationService.checkUserExistAndGetUUIDBack(username);
         if (bidRepository.findBidsByAuthorId(userID).isEmpty()){
             throw new BidNotFoundException("Тендер или предложение не найдено.");
         }
@@ -144,16 +144,18 @@ public class BidServiceImplementation implements BidServiceInterface {
 
     @Override
     public BidsStatuses getBidsStatuses(String bidId, String username) {
-        Bid bid = validationService.checkBidExists(bidId, username);
-        authorizationService.checkUserBidResponses(bid.getId(), validationService.checkUserExist(username));
+        Bid bid = validationService.checkBidExistsAndIfExistsGetBack(bidId, username);
+        authorizationService.checkUserBidResponses(bid.getId(),
+                validationService.checkUserExistAndGetUUIDBack(username));
         return bid.getStatus();
     }
 
     @Override
     public BidDTO updateBidStatus(String bidId, String status, String username) {
 
-        Bid bid = validationService.checkBidExists(bidId, username);
-        authorizationService.checkUserBidResponses(bid.getId(), validationService.checkUserExist(username));
+        Bid bid = validationService.checkBidExistsAndIfExistsGetBack(bidId, username);
+        authorizationService.checkUserBidResponses(bid.getId(),
+                validationService.checkUserExistAndGetUUIDBack(username));
 
 
         if (!validationService.isValidEnumValue(status, BidsStatuses.class)){
@@ -170,10 +172,11 @@ public class BidServiceImplementation implements BidServiceInterface {
     @Override
     public BidDTO updateBid(String bidId, String username, Map<String, Object> updates) {
         checkUpdateParameters(updates);
-        validationService.checkUserExist(username);
-        Bid bid = validationService.checkBidExists(bidId, username);
+        UUID userId = validationService.checkUserExistAndGetUUIDBack(username);
+        Bid bid = validationService.checkBidExistsAndIfExistsGetBack(bidId, username);
 
         bidHistoryServiceInterface.saveBidHistory(bid);
+        authorizationService.checkUserBidResponses(UUID.fromString(bidId), userId);
 
         for (Map.Entry<String, Object> entry : updates.entrySet()) {
             String field = entry.getKey();
@@ -234,8 +237,8 @@ public class BidServiceImplementation implements BidServiceInterface {
     @Override
     public BidDTO rollbackBid(String bidId, String username, int version) {
         UUID userId = validationService.checkUUID(bidId);
-        validationService.checkUserExist(username);
-        validationService.checkBidExists(bidId, username);
+        validationService.checkUserExistAndGetUUIDBack(username);
+        validationService.checkBidExistsAndIfExistsGetBack(bidId, username);
         authorizationService.checkUserBidResponses(UUID.fromString(bidId), userId);
         return bidHistoryServiceInterface.rollbackBid(UUID.fromString(bidId), version, username);
     }
@@ -247,8 +250,8 @@ public class BidServiceImplementation implements BidServiceInterface {
             throw new InvalidEnumException("Решение не может быть отправлено.");
         }
 
-        Bid bid = validationService.checkBidExists(bidId, username);
-        validationService.checkUserExist(username);
+        Bid bid = validationService.checkBidExistsAndIfExistsGetBack(bidId, username);
+        validationService.checkUserExistAndGetUUIDBack(username);
 
         List<Decision> existingDecisions = decisionRepository.findByBidId(UUID.fromString(bidId));
         if (existingDecisions.stream().anyMatch(d -> d.getUsername().equals(username))) {
@@ -284,9 +287,9 @@ public class BidServiceImplementation implements BidServiceInterface {
     @Override
     public void submitFeedback(String bidId, String feedback, String username) {
         validationService.checkUUID((bidId));
-        validationService.checkUserExist(username);
+        validationService.checkUserExistAndGetUUIDBack(username);
 
-        Bid bid = validationService.checkBidExists(bidId, username);
+        Bid bid = validationService.checkBidExistsAndIfExistsGetBack(bidId, username);
         if (bid.getReview() != null) {
             throw new ReviewAlreadySentException("Отзыв уже был отправлен по этому предложению.");
         }
@@ -302,8 +305,8 @@ public class BidServiceImplementation implements BidServiceInterface {
     }
 
     private void validateTenderExistenceAndUserResponses(String tenderID, String username) {
-        Tender tender = validationService.checkTenderExists(tenderID);
-        UUID userId = validationService.checkUserExist(username);
+        Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
+        UUID userId = validationService.checkUserExistAndGetUUIDBack(username);
         authorizationService.checkUserOrganizationResponses(tender.getOrganization_id(), userId);
     }
 

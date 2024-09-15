@@ -46,16 +46,16 @@ public class ValidationService implements ValidationServiceInterface {
     }
 
     @Override
-    public UUID checkUserExist(String username) {
-        UUID userId = userRepository.findUserByUsername(username).getId();
-        if (userId == null) {
+    public UUID checkUserExistAndGetUUIDBack(String username) {
+        Employee user = userRepository.findUserByUsername(username);
+        if (user == null) {
             throw new EmployeeNotFoundException("Пользователь не существует или некорректен.");
         }
-        return userId;
+        return user.getId();
     }
 
     @Override
-    public UUID checkUserExist(UUID userID){
+    public UUID checkUserExistAndGetUUIDBack(UUID userID){
         Optional<Employee> employee = userRepository.findById(userID);
         if (!employee.isPresent()) {
             throw new EmployeeNotFoundException("Пользователь не существует или некорректен.");
@@ -64,17 +64,17 @@ public class ValidationService implements ValidationServiceInterface {
     }
 
     @Override
-    public Tender checkTenderExists(String tenderId) {
-        checkUUID(tenderId);
-        return tenderRepository.findById(UUID.fromString(tenderId))
+    public Tender checkTenderExistsAndIfExistsGetBack(String tenderId) {
+        UUID tenderID = checkUUID(tenderId);
+        return tenderRepository.findById(tenderID)
                 .orElseThrow(() -> new TenderNotFoundException("Тендер не найден."));
     }
 
     @Override
-    public Bid checkBidExists(String bidId, String username) {
-        checkUUID(bidId);
-        checkUserExist(username);
-        Optional<Bid> bid = bidRepository.findById(UUID.fromString(bidId));
+    public Bid checkBidExistsAndIfExistsGetBack(String bidId, String username) {
+        UUID bidID = checkUUID(bidId);
+        checkUserExistAndGetUUIDBack(username);
+        Optional<Bid> bid = bidRepository.findById(bidID);
         if (!bid.isPresent()) {
             throw new BidNotFoundException("Предложение не найдено.");
         }

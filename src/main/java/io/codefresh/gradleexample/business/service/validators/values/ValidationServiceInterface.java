@@ -8,10 +8,9 @@ import java.util.UUID;
 
 public interface ValidationServiceInterface {
     UUID checkUUID(String uuid);
-    UUID checkUserExist(String username);
-    UUID checkUserExist(UUID userID);
-    Tender checkTenderExists(String tenderId);
-    Bid checkBidExists(String bidId, String username);
+    UUID checkUserExistAndGetUUIDBack(String username);
+    Tender checkTenderExistsAndIfExistsGetBack(String tenderId);
+    Bid checkBidExistsAndIfExistsGetBack(String bidId, String username);
 
     <T extends Enum<T>> boolean isValidEnumValue(String value,
                                                  Class<T> enumClass);
