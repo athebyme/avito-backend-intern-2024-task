@@ -11,4 +11,4 @@ docker-compose up --build
 
 ## Ошибки
 
-# org.postgresql.util.PSQLException: FATAL: odyssey: c4da33337414e: too many active clients for user (pool_size for user cnrprod1725773447-team-79619.cnrprod1725773447-team-79619 reached 10) - слишком много соединений к базе данных.
+### org.postgresql.util.PSQLException: FATAL: odyssey: c4da33337414e: too many active clients for user (pool_size for user cnrprod1725773447-team-79619.cnrprod1725773447-team-79619 reached 10) - слишком много соединений к базе данных.
