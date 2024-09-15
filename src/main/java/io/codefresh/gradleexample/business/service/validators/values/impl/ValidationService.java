@@ -55,15 +55,6 @@ public class ValidationService implements ValidationServiceInterface {
     }
 
     @Override
-    public UUID checkUserExistAndGetUUIDBack(UUID userID){
-        Optional<Employee> employee = userRepository.findById(userID);
-        if (!employee.isPresent()) {
-            throw new EmployeeNotFoundException("Пользователь не существует или некорректен.");
-        }
-        return userID;
-    }
-
-    @Override
     public Tender checkTenderExistsAndIfExistsGetBack(String tenderId) {
         UUID tenderID = checkUUID(tenderId);
         return tenderRepository.findById(tenderID)
