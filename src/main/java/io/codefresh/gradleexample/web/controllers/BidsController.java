@@ -40,13 +40,28 @@ public class BidsController {
     }
 
     @PostMapping("/new")
-    public BidDTO createBid(@RequestBody BidCreationDTO bid) {
-        return bidService.createBid(
-                bid.getName(),
-                bid.getDescription(),
-                bid.getTenderId(),
-                bid.getAuthorType(),
-                bid.getAuthorId());
+    public ResponseEntity<?> createBid(@RequestBody BidCreationDTO bid) {
+        try{
+            BidDTO created = bidService.createBid(
+                    bid.getName(),
+                    bid.getDescription(),
+                    bid.getTenderId(),
+                    bid.getAuthorType(),
+                    bid.getAuthorId());
+            return ResponseEntity.ok(created);
+        }catch (TenderNotFoundException | EmployeeNotFoundException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        }catch (InvalidEnumException | InvalidUUIDException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
+        }catch (EmployeeHasNoResponsibleException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.FORBIDDEN);
+        }catch (Exception e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/my")
