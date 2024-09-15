@@ -44,9 +44,9 @@ public class BidReviewServiceImplementation implements BidReviewServiceInterface
         authorizationService.checkUserOrganizationResponses(tender.getOrganization_id(), requesterId);
 
 
-        List<Bid> bids = bidRepository.findByTenderIdAndAuthorId(tenderId, authorId);
+        List<Bid> bids = bidRepository.findBidsByAuthorId(authorId);
         if (bids.isEmpty()) {
-            throw new BidNotFoundException("Предложения автора для указанного тендера не найдены.");
+            throw new BidNotFoundException("Предложения автора не найдены.");
         }
 
         List<BidReview> reviews = bidReviewRepository.findByBidIn(bids);
