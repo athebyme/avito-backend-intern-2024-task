@@ -84,7 +84,7 @@ public class BidsController {
         try{
             BidsStatuses bidsStatuses = bidService.getBidsStatuses(bidId, username);
             return ResponseEntity.ok(bidsStatuses);
-        }catch (BidNotFoundException | EmployeeNotFoundException e) {
+        } catch (BidNotFoundException | EmployeeNotFoundException e) {
             return errorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (EmployeeHasNoResponsibleException e){
             return errorResponse(e.getMessage(), HttpStatus.FORBIDDEN);

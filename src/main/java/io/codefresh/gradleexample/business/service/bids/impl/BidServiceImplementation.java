@@ -111,6 +111,7 @@ public class BidServiceImplementation implements BidServiceInterface {
         if (bidRepository.findBidsByAuthorId(userID).isEmpty()){
             throw new BidNotFoundException("Тендер или предложение не найдено.");
         }
+
         Tender tender = tenderRepository.findByCreatorUsername(username).stream().filter(p -> Objects.equals(p.getId(), UUID.fromString(tenderId))).findFirst().orElse(null);
         if (tender == null){
             throw new TenderNotFoundException("Тендер или предложение не найдено.");
@@ -118,7 +119,7 @@ public class BidServiceImplementation implements BidServiceInterface {
 
         List<Bid> bids = bidRepository.findBidsByTenderId(UUID.fromString(tenderId));
         if (bids.isEmpty()) {
-            throw new BidNotFoundException("Предложения не найдены");
+            throw new BidNotFoundException("Тендер или предложение не найдено.");
         }
 
         bids.sort(Comparator.comparing(Bid::getName));
@@ -144,6 +145,7 @@ public class BidServiceImplementation implements BidServiceInterface {
     @Override
     public BidsStatuses getBidsStatuses(String bidId, String username) {
         Bid bid = validationService.checkBidExists(bidId, username);
+        authorizationService.checkUserBidResponses(bid.getId(), validationService.checkUserExist(username));
         return bid.getStatus();
     }
 
@@ -282,7 +284,6 @@ public class BidServiceImplementation implements BidServiceInterface {
     @Override
     public void submitFeedback(String bidId, String feedback, String username) {
         validationService.checkUUID((bidId));
-        validationService.checkUserExist(UUID.fromString(bidId));
         validationService.checkUserExist(username);
 
         Bid bid = validationService.checkBidExists(bidId, username);
