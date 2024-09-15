@@ -94,6 +94,12 @@ public class BidsController {
         }catch (EmployeeHasNoResponsibleException e){
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.FORBIDDEN);
+        } catch (InvalidUUIDException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -110,6 +116,12 @@ public class BidsController {
         } catch (EmployeeHasNoResponsibleException e){
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.FORBIDDEN);
+        } catch (InvalidUUIDException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -121,7 +133,7 @@ public class BidsController {
         try{
             BidDTO bid = bidService.updateBidStatus(bidId, status, username);
             return ResponseEntity.ok(bid);
-        }catch (IllegalArgumentException | InvalidEnumException e){
+        }catch (InvalidEnumException | InvalidUUIDException e){
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.BAD_REQUEST);
         }catch (BidNotFoundException | EmployeeNotFoundException e){
@@ -130,6 +142,9 @@ public class BidsController {
         }catch (EmployeeHasNoResponsibleException e){
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -151,7 +166,7 @@ public class BidsController {
         } catch (InvalidEnumException | InvalidUUIDException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.BAD_REQUEST);
-        } catch (Exception ex) {
+        } catch (Exception e) {
             ErrorResponse error = new ErrorResponse("Ошибка при обновлении предложения.");
             return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -166,15 +181,18 @@ public class BidsController {
         try {
             BidDTO updatedBid = bidService.rollbackBid(bidId, username, version);
             return ResponseEntity.ok(updatedBid);
-        } catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException | BidNotFoundException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.NOT_FOUND);
         } catch (EmployeeHasNoResponsibleException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.FORBIDDEN);
-        } catch (InvalidEnumException e) {
+        } catch (InvalidUUIDException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.BAD_REQUEST);
+        }catch (Exception e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -190,9 +208,18 @@ public class BidsController {
         }catch (EmployeeNotFoundException | BidNotFoundException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (EmployeeHasNoResponsibleException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.FORBIDDEN);
         } catch (UserAlreadySentDecisionException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.CONFLICT);
+        } catch (InvalidUUIDException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
+        }catch (Exception e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -205,12 +232,15 @@ public class BidsController {
         try {
             bidService.submitFeedback(bidId, bidFeedback, username);
             return ResponseEntity.ok("Отзыв успешно отправлен.");
-        } catch (EmployeeNotFoundException e) {
-            ErrorResponse error = new ErrorResponse(e.getMessage());
-            return error.toResponseEntity(HttpStatus.UNAUTHORIZED);
-        } catch (BidNotFoundException e) {
+        } catch (EmployeeNotFoundException | BidNotFoundException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (EmployeeHasNoResponsibleException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.FORBIDDEN);
+        } catch (InvalidUUIDException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -234,15 +264,12 @@ public class BidsController {
         } catch (InvalidUUIDException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.BAD_REQUEST);
-        } catch (EmployeeNotFoundException e) {
+        } catch (EmployeeNotFoundException | BidNotFoundException | TenderNotFoundException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
-            return error.toResponseEntity(HttpStatus.UNAUTHORIZED);
+            return error.toResponseEntity(HttpStatus.NOT_FOUND);
         } catch (EmployeeHasNoResponsibleException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.FORBIDDEN);
-        } catch (BidNotFoundException | TenderNotFoundException e) {
-            ErrorResponse error = new ErrorResponse(e.getMessage());
-            return error.toResponseEntity(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);

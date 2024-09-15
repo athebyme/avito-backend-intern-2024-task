@@ -5,6 +5,7 @@ import io.codefresh.gradleexample.dao.dto.tenders.TenderCreationRequest;
 import io.codefresh.gradleexample.dao.dto.tenders.TenderDTO;
 import io.codefresh.gradleexample.dao.entities.tenders.TenderStatuses;
 import io.codefresh.gradleexample.exceptions.ErrorResponse;
+import io.codefresh.gradleexample.exceptions.service.InvalidUUIDException;
 import io.codefresh.gradleexample.exceptions.service.employee.EmployeeHasNoResponsibleException;
 import io.codefresh.gradleexample.exceptions.service.employee.EmployeeNotFoundException;
 import io.codefresh.gradleexample.exceptions.service.InvalidEnumException;
@@ -30,8 +31,8 @@ public class TenderController {
 
     @GetMapping
     public List<TenderDTO> getTenders(
-            @RequestParam(name = "limit", required = false) Integer limit,
-            @RequestParam(name = "offset", required = false) Integer offset,
+            @RequestParam(name = "limit", required = false, defaultValue = "5") int limit,
+            @RequestParam(name = "offset", required = false, defaultValue = "0") int offset,
             @RequestParam(name = "service_type", required = false) List<String> serviceTypes
     ) {
         return tenderService.getAllTenders(limit, offset, serviceTypes);
@@ -39,8 +40,8 @@ public class TenderController {
 
     @GetMapping("/my")
     public ResponseEntity<?> getMyTenders(
-            @RequestParam(name = "limit", required = false) Integer limit,
-            @RequestParam(name = "offset", required = false) Integer offset,
+            @RequestParam(name = "limit", required = false, defaultValue = "5") int limit,
+            @RequestParam(name = "offset", required = false, defaultValue = "0") int offset,
             @RequestParam(name = "username") String username
     ) {
         try{
@@ -63,9 +64,12 @@ public class TenderController {
         try{
             TenderStatuses status = tenderService.getTenderStatus(tenderID, username);
             return ResponseEntity.ok(status);
-        }catch (EmployeeNotFoundException e){
+        }catch (EmployeeNotFoundException | TenderNotFoundException e){
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (InvalidEnumException | InvalidUUIDException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
         }catch (EmployeeHasNoResponsibleException e){
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.FORBIDDEN);
@@ -79,13 +83,27 @@ public class TenderController {
     public ResponseEntity<?> createTender(
             @RequestBody() TenderCreationRequest tenderDTO
     ){
-        TenderDTO createdTender = tenderService.createTender(
-                tenderDTO.getName(),
-                tenderDTO.getDescription(),
-                tenderDTO.getServiceType(),
-                tenderDTO.getOrganizationId(),
-                tenderDTO.getCreatorUsername());
-        return ResponseEntity.ok(createdTender);
+        try{
+            TenderDTO createdTender = tenderService.createTender(
+                    tenderDTO.getName(),
+                    tenderDTO.getDescription(),
+                    tenderDTO.getServiceType(),
+                    tenderDTO.getOrganizationId(),
+                    tenderDTO.getCreatorUsername());
+            return ResponseEntity.ok(createdTender);
+        }catch (EmployeeNotFoundException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        }catch (EmployeeHasNoResponsibleException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.FORBIDDEN);
+        } catch (InvalidEnumException | InvalidUUIDException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
+        }catch (Exception e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/{tenderID}/status")
@@ -100,6 +118,9 @@ public class TenderController {
         } catch (EmployeeNotFoundException | TenderNotFoundException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (InvalidEnumException | InvalidUUIDException e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
         }catch (EmployeeHasNoResponsibleException e){
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.FORBIDDEN);
@@ -125,7 +146,7 @@ public class TenderController {
         } catch (EmployeeHasNoResponsibleException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.FORBIDDEN);
-        } catch (InvalidEnumException e) {
+        } catch (InvalidEnumException | InvalidUUIDException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -149,9 +170,12 @@ public class TenderController {
         } catch (EmployeeHasNoResponsibleException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.FORBIDDEN);
-        } catch (InvalidEnumException e) {
+        } catch (InvalidEnumException | InvalidUUIDException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
