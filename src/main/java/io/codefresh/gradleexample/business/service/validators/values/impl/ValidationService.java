@@ -25,9 +25,14 @@ import java.util.UUID;
  */
 @Component
 public class ValidationService implements ValidationServiceInterface {
+
+
+    // как будто бы можно вынести в разные сервисы
     private final UserRepository userRepository;
     private final TenderRepository tenderRepository;
     private final BidRepository bidRepository;
+    //
+
 
     @Autowired
     public ValidationService(UserRepository userRepository, TenderRepository tenderRepository, BidRepository bidRepository) {
