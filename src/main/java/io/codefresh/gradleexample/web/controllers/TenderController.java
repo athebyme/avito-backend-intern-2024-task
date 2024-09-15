@@ -59,7 +59,7 @@ public class TenderController {
     @GetMapping("/{tenderID}/status")
     public ResponseEntity<?> getTenderStatus(
             @PathVariable String tenderID,
-            @RequestParam(name = "username", required = false) String username
+            @RequestParam(name = "username") String username
     ) {
         try{
             TenderStatuses status = tenderService.getTenderStatus(tenderID, username);

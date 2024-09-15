@@ -66,7 +66,9 @@ public class BidServiceImplementation implements BidServiceInterface {
     @Override
     public BidDTO createBid(String name, String description, String tenderId, String authorType, String authorId) {
         String authorUsername = userService.getEmployeeById(UUID.fromString(authorId)).getUsername();
+        validationService.isValidEnumValue(authorType, AuthorType.class);
         validateTenderExistenceAndUserResponses(tenderId, authorUsername);
+
         bidBuilder.name(name)
                 .description(description)
                 .authorType(AuthorType.valueOf(authorType))
