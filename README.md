@@ -82,21 +82,13 @@ POST /api/tenders/new
 
 Request Body:
 
-  {
-
-    "name": "Тендер 1",
-
-    "description": "Описание тендера",
-
-    "serviceType": "Construction",
-
-    "status": "Open",
-
-    "organizationId": 1,
-
-    "creatorUsername": "user1"
-
-  }
+{
+  "name": "Тендер 1",
+  "description": "Доставка вкусных пончиков",
+  "serviceType": "Delivery",
+  "organizationId": "550e8400-e29b-41d4-a716-446655440020",
+  "creatorUsername": "user1"
+}
 
 Response:
 
@@ -104,12 +96,17 @@ Response:
 
   Body: 
   
-  { 
-    "id": 1, 
-    "name": "Тендер 1", 
-    "description": "Описание тендера",
-    ...
-  }
+{
+    "id": "8ff28183-3d7e-41fd-ba97-f23cef173c9a",
+    "version": 1,
+    "description": "Доставка вкусных пончиков",
+    "name": "Тендер 1",
+    "creatorUsername": "user1",
+    "organization_id": "550e8400-e29b-41d4-a716-446655440020",
+    "tender_status": "Created",
+    "created_at": "2024-09-16T11:42:02.809+0000"
+}
+
 ```
 
 #### Получение тендеров пользователя
@@ -184,33 +181,27 @@ POST /api/bids/new
 
 Request Body:
 
-  {
-
-    "name": "Предложение 1",
-
-    "description": "Описание предложения",
-
-    "status": "Submitted",
-
-    "tenderId": 1,
-
-    "organizationId": 1,
-
-    "creatorUsername": "user1"
-
-  }
-
+{
+   "name": "Велосипед",
+   "description": "Мы сможем доставлять ваши вкусные пончики куда угодно всего за 5 минут",
+   "tenderId": "8ff28183-3d7e-41fd-ba97-f23cef173c9a",
+   "authorType": "Organization",
+   "authorId": "550e8400-e29b-41d4-a716-446655440002"
+}
 Response:
 
   200 OK
 
   Body: 
-  { 
-    "id": 1, 
-    "name": "Предложение 1", 
-    "description": "Описание предложения",
-    ...
-  }
+{
+    "id": "31bc883c-eba2-4d7a-bee5-32e70571ef2d",
+    "name": "Велосипед",
+    "status": "Created",
+    "authorType": "Organization",
+    "authorID": "550e8400-e29b-41d4-a716-446655440002",
+    "version": 1,
+    "created_at": "2024-09-16T11:51:24.806+0000"
+}
 ```
 
 #### Получение списка предложений пользователя
