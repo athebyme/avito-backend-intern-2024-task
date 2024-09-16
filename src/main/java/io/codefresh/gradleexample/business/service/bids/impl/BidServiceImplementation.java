@@ -252,7 +252,7 @@ public class BidServiceImplementation implements BidServiceInterface {
         }
 
         Bid bid = validationService.checkBidExistsAndIfExistsGetBack(bidId, username);
-        if(bid.getDecisionStatus() != null){
+        if(bid.getDecisionStatus() != null && bid.getDecisionStatus() != BidDecision.Quorum){
             throw new DecisionIsAlreadyCompletedException(String.format("Решение по данному предложению уже сделано. %s", bid.getDecisionStatus()));
         }
         validationService.checkUserExistAndGetUUIDBack(username);
