@@ -65,7 +65,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
             tenders = tenders.subList(0, limit);
         }
 
-        if (!serviceTypes.isEmpty()) {
+        if (serviceTypes!= null && !serviceTypes.isEmpty()) {
             if (!validationService.isValidEnumValue(serviceTypes, ServiceTypes.class)) {
                 throw new InvalidEnumException("Неверный формат запроса или его параметры.");
             }
@@ -117,21 +117,14 @@ public class TenderServiceImplementation implements TenderServiceInterface {
         if (!tenderResponsibleService.hasResponsible(UUID.fromString(organization_id), userID)){
             throw new EmployeeHasNoResponsibleException("Недостаточно прав для выполнения действия.");
         }
-
-        try{
-
-            tenderBuilder
-                    .name(name)
-                    .description(description)
-                    .serviceType(serviceType)
-                    .organization_id(UUID.fromString(organization_id))
-                    .creatorName(creatorUsername)
-                    .version(1)
-                    .status(TenderStatuses.Created);
-        }
-        catch (Exception e){
-            logger.error(e.getMessage());
-        }
+        tenderBuilder
+                .name(name)
+                .description(description)
+                .serviceType(serviceType)
+                .organization_id(UUID.fromString(organization_id))
+                .creatorName(creatorUsername)
+                .version(1)
+                .status(TenderStatuses.Created);
 
         Tender tender = tenderBuilder.Build();
         tender.setCreated_at(new Timestamp(System.currentTimeMillis()));
