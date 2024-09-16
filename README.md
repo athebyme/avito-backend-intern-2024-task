@@ -7,6 +7,7 @@
 ## Структура проекта
 
 В папке src представлен исходный код приложения
+Spring Hibernate - автомиграция. Базы Employee, Organization, Organization_responsible должны иметь какие-либо данные (по условию задания данные уже есть)
 
 есть docker-compose.yml, dockerfile файлы для создания контейнера
 
