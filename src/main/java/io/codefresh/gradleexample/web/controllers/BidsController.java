@@ -12,6 +12,7 @@ import io.codefresh.gradleexample.exceptions.ErrorResponse;
 import io.codefresh.gradleexample.exceptions.service.InvalidEnumException;
 import io.codefresh.gradleexample.exceptions.service.InvalidUUIDException;
 import io.codefresh.gradleexample.exceptions.service.bids.BidNotFoundException;
+import io.codefresh.gradleexample.exceptions.service.bids.DecisionIsAlreadyCompletedException;
 import io.codefresh.gradleexample.exceptions.service.bids.UserAlreadySentDecisionException;
 import io.codefresh.gradleexample.exceptions.service.employee.EmployeeHasNoResponsibleException;
 import io.codefresh.gradleexample.exceptions.service.employee.EmployeeNotFoundException;
@@ -211,7 +212,7 @@ public class BidsController {
         } catch (EmployeeHasNoResponsibleException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.FORBIDDEN);
-        } catch (UserAlreadySentDecisionException e) {
+        } catch (UserAlreadySentDecisionException | DecisionIsAlreadyCompletedException e) {
             ErrorResponse error = new ErrorResponse(e.getMessage());
             return error.toResponseEntity(HttpStatus.CONFLICT);
         } catch (InvalidUUIDException e) {
