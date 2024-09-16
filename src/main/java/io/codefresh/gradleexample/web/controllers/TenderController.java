@@ -30,12 +30,24 @@ public class TenderController {
     }
 
     @GetMapping
-    public List<TenderDTO> getTenders(
+    public ResponseEntity<?> getTenders(
             @RequestParam(name = "limit", required = false, defaultValue = "5") int limit,
             @RequestParam(name = "offset", required = false, defaultValue = "0") int offset,
             @RequestParam(name = "service_type", required = false) List<String> serviceTypes
     ) {
-        return tenderService.getAllTenders(limit, offset, serviceTypes);
+        try{
+            List<TenderDTO> tenders = tenderService.getAllTenders(limit, offset, serviceTypes);
+            return ResponseEntity.ok(tenders);
+        }catch (InvalidEnumException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.BAD_REQUEST);
+        } catch (TenderNotFoundException e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.NOT_FOUND);
+        } catch (Exception e){
+            ErrorResponse error = new ErrorResponse(e.getMessage());
+            return error.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/my")
