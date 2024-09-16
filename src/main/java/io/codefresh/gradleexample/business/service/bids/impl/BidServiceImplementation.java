@@ -70,7 +70,8 @@ public class BidServiceImplementation implements BidServiceInterface {
             throw new InvalidEnumException("Неверный формат запроса или его параметры.");
         }
         if (AuthorType.valueOf(authorType) == AuthorType.User){
-            validateTenderExistence(tenderId, authorUsername);
+            validationService.checkTenderExistsAndIfExistsGetBack(tenderId);
+            validationService.checkUserExistAndGetUUIDBack(authorUsername);
         } else if (AuthorType.valueOf(authorType) == AuthorType.Organization) {
             validateTenderExistenceAndUserResponses(tenderId, authorUsername);
         }
@@ -132,18 +133,9 @@ public class BidServiceImplementation implements BidServiceInterface {
 
         bids.sort(Comparator.comparing(Bid::getName));
 
-        if (offset != null){
-            if (offset > bids.size()) {
-                bids = new ArrayList<>();
-            } else {
-                bids = bids.subList(offset, bids.size());
-            }
-        }
-
-        if (limit != null){
-            int endIndex = Math.min(limit, bids.size());
-            bids = bids.subList(0, endIndex);
-        }
+        int fromIndex = Math.min(offset, bids.size());
+        int toIndex = Math.min(offset + limit, bids.size());
+        bids = bids.subList(fromIndex, toIndex);
 
         return bids.stream()
                 .map(BidConverter::toDTO)
@@ -244,10 +236,10 @@ public class BidServiceImplementation implements BidServiceInterface {
 
     @Override
     public BidDTO rollbackBid(String bidId, String username, int version) {
-        UUID userId = validationService.checkUUID(bidId);
-        validationService.checkUserExistAndGetUUIDBack(username);
+        UUID bidID = validationService.checkUUID(bidId);
+        UUID userId = validationService.checkUserExistAndGetUUIDBack(username);
         validationService.checkBidExistsAndIfExistsGetBack(bidId, username);
-        authorizationService.checkUserBidResponses(UUID.fromString(bidId), userId);
+        authorizationService.checkUserBidResponses(bidID, userId);
         return bidHistoryServiceInterface.rollbackBid(UUID.fromString(bidId), version, username);
     }
 
@@ -316,11 +308,6 @@ public class BidServiceImplementation implements BidServiceInterface {
         Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
         UUID userId = validationService.checkUserExistAndGetUUIDBack(username);
         authorizationService.checkUserOrganizationResponses(tender.getOrganization_id(), userId);
-    }
-
-    private void validateTenderExistence(String tenderID, String username){
-        validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
-        validationService.checkUserExistAndGetUUIDBack(username);
     }
 
     private void checkUpdateParameters(Map<String, Object> updates){
