@@ -1,7 +1,5 @@
 package io.codefresh.gradleexample;
 
-import io.codefresh.gradleexample.business.service.tenders.TenderResponsibleServiceInterface;
-import io.codefresh.gradleexample.business.service.validators.values.impl.ValidationService;
 import io.codefresh.gradleexample.dao.builders.tender.TenderBuilder;
 import io.codefresh.gradleexample.dao.entities.tenders.ServiceTypes;
 import io.codefresh.gradleexample.dao.entities.tenders.Tender;
