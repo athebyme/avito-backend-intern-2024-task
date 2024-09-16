@@ -210,14 +210,25 @@ Response:
 - **Описание:** Возвращает список предложений текущего пользователя.
 
 ```yaml
-GET /api/bids/my?username=user1
+GET /api/bids/my?username=user5
 
 Response:
 
   200 OK
 
-  Body: [ {...}, {...}, ... ]
-  ```
+  Body:
+   [
+       {
+           "id": "5b451525-e7f3-4664-8163-0fe26aeb7c62",
+           "name": "Велосипед",
+           "status": "Created",
+           "authorType": "User",
+           "authorID": "550e8400-e29b-41d4-a716-446655440005",
+           "version": 1,
+           "created_at": "2024-09-16T12:01:58.750+0000"
+       }
+   ]
+```
   
 #### Получение списка предложений для тендера
 - **Эндпоинт:** GET /bids/{tenderId}/list
