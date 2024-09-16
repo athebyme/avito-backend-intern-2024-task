@@ -15,6 +15,7 @@ import io.codefresh.gradleexample.dao.repository.bids.DecisionRepository;
 import io.codefresh.gradleexample.dao.repository.tenders.TenderRepository;
 import io.codefresh.gradleexample.exceptions.service.InvalidEnumException;
 import io.codefresh.gradleexample.exceptions.service.bids.BidNotFoundException;
+import io.codefresh.gradleexample.exceptions.service.bids.DecisionIsAlreadyCompletedException;
 import io.codefresh.gradleexample.exceptions.service.bids.ReviewAlreadySentException;
 import io.codefresh.gradleexample.exceptions.service.bids.UserAlreadySentDecisionException;
 import io.codefresh.gradleexample.exceptions.service.tenders.TenderNotFoundException;
@@ -251,6 +252,9 @@ public class BidServiceImplementation implements BidServiceInterface {
         }
 
         Bid bid = validationService.checkBidExistsAndIfExistsGetBack(bidId, username);
+        if(bid.getDecisionStatus() != null){
+            throw new DecisionIsAlreadyCompletedException(String.format("Решение по данному предложению уже сделано. %s", bid.getDecisionStatus()));
+        }
         validationService.checkUserExistAndGetUUIDBack(username);
 
         List<Decision> existingDecisions = decisionRepository.findByBidId(UUID.fromString(bidId));
