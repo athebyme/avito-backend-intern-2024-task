@@ -319,8 +319,8 @@ public class BidServiceImplementation implements BidServiceInterface {
     }
 
     private void validateTenderExistence(String tenderID, String username){
-        Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
-        UUID userId = validationService.checkUserExistAndGetUUIDBack(username);
+        validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
+        validationService.checkUserExistAndGetUUIDBack(username);
     }
 
     private void checkUpdateParameters(Map<String, Object> updates){
