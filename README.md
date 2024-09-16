@@ -135,13 +135,25 @@ Response:
 - `username` (обязательный) : Имя пользователя.         - Query / String
 
 ```yaml
-GET /api/tenders/my?username=user1
+GET /api/tenders/my?username=user3
 
 Response:
 
   200 OK
 
-  Body: [ {...}, {...}, ... ]  
+  Body: 
+  [
+    {
+        "id": "74212f9c-bfd8-4f8f-b482-db032df10321",
+        "version": 1,
+        "description": "tу2",
+        "name": "t3",
+        "creatorUsername": "user3",
+        "organization_id": "550e8400-e29b-41d4-a716-446655440020",
+        "tender_status": "Created",
+        "created_at": "2024-09-15T19:29:28.196+0000"
+    }
+]
 ```
 
 #### 5. Получение текущего статуса тендера
