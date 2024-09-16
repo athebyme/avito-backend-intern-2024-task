@@ -69,7 +69,11 @@ public class BidServiceImplementation implements BidServiceInterface {
         if (!validationService.isValidEnumValue(authorType, AuthorType.class)){
             throw new InvalidEnumException("Неверный формат запроса или его параметры.");
         }
-        validateTenderExistenceAndUserResponses(tenderId, authorUsername);
+        if (AuthorType.valueOf(authorType) == AuthorType.User){
+            validateTenderExistence(tenderId, authorUsername);
+        } else if (AuthorType.valueOf(authorType) == AuthorType.Organization) {
+            validateTenderExistenceAndUserResponses(tenderId, authorUsername);
+        }
 
         bidBuilder.name(name)
                 .description(description)
@@ -312,6 +316,11 @@ public class BidServiceImplementation implements BidServiceInterface {
         Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
         UUID userId = validationService.checkUserExistAndGetUUIDBack(username);
         authorizationService.checkUserOrganizationResponses(tender.getOrganization_id(), userId);
+    }
+
+    private void validateTenderExistence(String tenderID, String username){
+        Tender tender = validationService.checkTenderExistsAndIfExistsGetBack(tenderID);
+        UUID userId = validationService.checkUserExistAndGetUUIDBack(username);
     }
 
     private void checkUpdateParameters(Map<String, Object> updates){
