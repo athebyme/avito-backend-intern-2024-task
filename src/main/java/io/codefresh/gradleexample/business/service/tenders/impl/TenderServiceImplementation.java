@@ -53,9 +53,6 @@ public class TenderServiceImplementation implements TenderServiceInterface {
 
     @Override
     public List<TenderDTO> getAllTenders(Integer limit, Integer offset, List<String> serviceTypes) {
-        if (!validationService.isValidEnumValue(serviceTypes, ServiceTypes.class)) {
-            throw new InvalidEnumException("Неверный формат запроса или его параметры.");
-        }
 
         List<Tender> tenders = tenderRepository.findAll();
         logger.debug(tenders.toString());
@@ -69,6 +66,9 @@ public class TenderServiceImplementation implements TenderServiceInterface {
         }
 
         if (!serviceTypes.isEmpty()) {
+            if (!validationService.isValidEnumValue(serviceTypes, ServiceTypes.class)) {
+                throw new InvalidEnumException("Неверный формат запроса или его параметры.");
+            }
             tenders = tenders.stream()
                     .filter(tender -> serviceTypes.contains(tender.getService_type().name()))
                     .collect(Collectors.toList());
