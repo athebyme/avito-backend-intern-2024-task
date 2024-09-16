@@ -58,6 +58,7 @@ public class TenderServiceImplementation implements TenderServiceInterface {
         }
 
         List<Tender> tenders = tenderRepository.findAll();
+        logger.debug(tenders.toString());
 
         if (offset != null){
             tenders = tenders.subList(offset, tenders.size());
