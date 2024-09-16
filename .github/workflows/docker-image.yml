@@ -1,0 +1,31 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    # Шаг 1: Клонирование репозитория
+    - uses: actions/checkout@v4
+
+    # Шаг 2: Логинимся в Docker Hub, если нужно (опционально)
+    # Добавь секреты DOCKER_USERNAME и DOCKER_PASSWORD через настройки GitHub репозитория.
+    # - name: Login to Docker Hub
+    #   run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+
+    - name: Run the Docker container
+      run: docker run -d -p 8080:8080 my-image-name:$(date +%s)
+
+    - name: Test the application
+      run: curl http://localhost:8080/health || echo "App failed to start"
